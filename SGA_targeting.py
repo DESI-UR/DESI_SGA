@@ -18,6 +18,9 @@ pix_scale_arcmin = pix_scale/60
 fiber_diameter = 1.52 # arcsec
 fiber_diameter_pixels = fiber_diameter/pix_scale
 
+patrol_radius = 1.4 # arcmin
+patrol_radius_pixels = patrol_radius/pix_scale_arcmin
+
 
 
 class GalaxyMarker(object):
@@ -83,6 +86,9 @@ class GalaxyMarker(object):
         self.prev_axes = self.fig.add_axes([.08, .6, .1, .05])
        
         self.save_axes = self.fig.add_axes([.08, .5, .1, .05])
+
+
+        #self.fiber_axes = self.fig.add_axes([0.08, 0.05, 0.2, 0.2])
        
        
        
@@ -179,6 +185,18 @@ class GalaxyMarker(object):
         self.display_axes.add_artist(SGA_ellipse)
         ########################################################################
 
+        '''
+        ########################################################################
+        # Plot the fiber patrol radius
+        #-----------------------------------------------------------------------
+        patrol_circle = plt.Circle((0, 0), 
+                                   patrol_radius_pixels, 
+                                   color='#000000', 
+                                   fill=False)
+
+        self.fiber_axes.add_artist(patrol_circle)
+        ########################################################################
+        '''
    
         self.add_existing_truth()
    
