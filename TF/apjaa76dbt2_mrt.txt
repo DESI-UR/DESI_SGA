@@ -1,56 +1,56 @@
-Title: Galaxy Groups within 3500 km/s 
-Authors: Kourkchi E., Tully R.B. 
-Table: Catalog of galaxy groups
-================================================================================
-Byte-by-byte Description of file: apjaa76dbt2_mrt.txt
---------------------------------------------------------------------------------
-   Bytes Format Units       Label  Explanations
---------------------------------------------------------------------------------
-   1-  7 I7     ---         PGC1   Group Principal Galaxies Catalog ID (1)
-   9- 15 I7     ---         PGC1+  Association Principal Galaxies Catalog ID (2)
-  17- 19 I3     ---         Mem    Number of galaxies in the group
-  21- 28 F8.4   deg         GLON   Galactic longitude
-  30- 37 F8.4   deg         GLAT   Galactic latitude
-  39- 46 F8.4   deg         SGL    Supergalactic longitude
-  48- 55 F8.4   deg         SGB    Supergalactic latitude
-  57- 61 F5.2   mag         Ksmag  Total Ks band apparent magnitude (3)
-  63- 67 F5.2   [solLum]    logK   ? log Ks band absolute luminosity of group
-  69- 72 I4     km/s        Vh     Heliocentric radial `velocity of group (4)
-  74- 77 I4     km/s        VLS    Radial velocity of group relative to 
-                                    Local Sheet (4)
-  79- 81 I3     ---         ND     Number of group members with measured
-                                    distances (5) 
-  83- 87 F5.2   Mpc         D      ? Distance of group (6)
-  89- 90 I2     %         e_D      ? Percentage uncertainty in D (7)
-  92- 94 I3     km/s        sigmaL Group velocity dispersion from luminosity (8)
-  96- 98 I3     km/s        sigmaV Group line-of-sight velocity dispersion (9)
- 100-104 F5.3   Mpc         R2t    Second turnaround radius of group 
-                                    from luminosity (10)
- 106-110 F5.3   Mpc         Rg     ? Projected virial radius of group (11)
- 112-117 F6.3   [solMass]   logMK  log of group mass from luminosity (12)
- 119-124 F6.3   [solMass]   logMd  ? log of group dynamic mass (13)
---------------------------------------------------------------------------------
-Note (1): In our catalog based on the PGC ID of the most luminous galaxy of 
-          the group from which the clustering process is started.
-Note (2): Of the group parent association.
-Note (3): Based on the integration of the Ks-band luminosity of all galaxies in
-          group. From the 2MRS11.75 catalog, we have at least the coverage of 
-          all galaxies brighter than Ks = 11.75 mag.
-Note (4): Calculated by unweighted averaging the radial velocity of their 
-          member galaxies.
-Note (5): In the CF3 catalog.
-Note (6): Based on the weighted averaged distance moduli of any members 
-          available in the Cosmicflows-3 distance catalog.
-Note (7): In recognition of systematics, a minimum to errors is set at 3%.
-Note (8): Based on the mass estimate from total luminosity, Equation 7.
-Note (9): Calculated based on the radial velocities of its members, Equation 3.
-Note (10): Based on their luminosity mass, Equation 6. 
-Note (11): Based on Equation 4.
-Note (12): Derived from the Ks-band luminosity by using M/L ratios given
-           in Equation 8. 
-Note (13): Calculated from virial radius and dynamical velocity dispersion
-           using Equation 5.
---------------------------------------------------------------------------------
+#Title: Galaxy Groups within 3500 km/s 
+#Authors: Kourkchi E., Tully R.B. 
+#Table: Catalog of galaxy groups
+#================================================================================
+#Byte-by-byte Description of file: apjaa76dbt2_mrt.txt
+#--------------------------------------------------------------------------------
+#   Bytes Format Units       Label  Explanations
+#--------------------------------------------------------------------------------
+#   1-  7 I7     ---         PGC1   Group Principal Galaxies Catalog ID (1)
+#   9- 15 I7     ---         PGC1+  Association Principal Galaxies Catalog ID (2)
+#  17- 19 I3     ---         Mem    Number of galaxies in the group
+#  21- 28 F8.4   deg         GLON   Galactic longitude
+#  30- 37 F8.4   deg         GLAT   Galactic latitude
+#  39- 46 F8.4   deg         SGL    Supergalactic longitude
+#  48- 55 F8.4   deg         SGB    Supergalactic latitude
+#  57- 61 F5.2   mag         Ksmag  Total Ks band apparent magnitude (3)
+#  63- 67 F5.2   [solLum]    logK   ? log Ks band absolute luminosity of group
+#  69- 72 I4     km/s        Vh     Heliocentric radial `velocity of group (4)
+#  74- 77 I4     km/s        VLS    Radial velocity of group relative to 
+#                                    Local Sheet (4)
+#  79- 81 I3     ---         ND     Number of group members with measured
+#                                    distances (5) 
+#  83- 87 F5.2   Mpc         D      ? Distance of group (6)
+#  89- 90 I2     %         e_D      ? Percentage uncertainty in D (7)
+#  92- 94 I3     km/s        sigmaL Group velocity dispersion from luminosity (8)
+#  96- 98 I3     km/s        sigmaV Group line-of-sight velocity dispersion (9)
+# 100-104 F5.3   Mpc         R2t    Second turnaround radius of group 
+#                                    from luminosity (10)
+# 106-110 F5.3   Mpc         Rg     ? Projected virial radius of group (11)
+# 112-117 F6.3   [solMass]   logMK  log of group mass from luminosity (12)
+# 119-124 F6.3   [solMass]   logMd  ? log of group dynamic mass (13)
+#--------------------------------------------------------------------------------
+#Note (1): In our catalog based on the PGC ID of the most luminous galaxy of 
+#          the group from which the clustering process is started.
+#Note (2): Of the group parent association.
+#Note (3): Based on the integration of the Ks-band luminosity of all galaxies in
+#          group. From the 2MRS11.75 catalog, we have at least the coverage of 
+#          all galaxies brighter than Ks = 11.75 mag.
+#Note (4): Calculated by unweighted averaging the radial velocity of their 
+#          member galaxies.
+#Note (5): In the CF3 catalog.
+#Note (6): Based on the weighted averaged distance moduli of any members 
+#          available in the Cosmicflows-3 distance catalog.
+#Note (7): In recognition of systematics, a minimum to errors is set at 3%.
+#Note (8): Based on the mass estimate from total luminosity, Equation 7.
+#Note (9): Calculated based on the radial velocities of its members, Equation 3.
+#Note (10): Based on their luminosity mass, Equation 6. 
+#Note (11): Based on Equation 4.
+#Note (12): Derived from the Ks-band luminosity by using M/L ratios given
+#           in Equation 8. 
+#Note (13): Calculated from virial radius and dynamical velocity dispersion
+#           using Equation 5.
+#--------------------------------------------------------------------------------
   43296   43296 191 302.2241  21.6465 156.3251 -11.5819  4.61 12.71 3407 3142  59 36.96  3 595 800 1.612 0.893 14.624 14.717 
   46618   43296  30 307.8738  19.2865 159.6426  -6.8008  6.07 12.11 3340 3086   5 37.57  7 350 307 0.950 0.745 13.936 13.808 
   45174   43296  34 306.0424  32.5707 146.1941  -6.0422  6.42 11.96 3292 3059   4 44.03  8 307 300 0.833 0.693 13.764 13.756 
