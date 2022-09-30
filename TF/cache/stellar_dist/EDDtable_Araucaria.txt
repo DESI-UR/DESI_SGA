@@ -1,0 +1,21 @@
+Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria,Araucaria
+pgc,Ref,Name,IRCeph,erC,esC,IRRRLy,erR,esR,TRGB,erT,esT,FGLR,eFGLR,EB,eEB
+%7s,%2d,%9s,%5.2f,%3.2f,%3.2f,%5.2f,%3.2f,%3.2f,%5.2f,%3.2f,%3.2f,%5.2f,%3.2f,%5.2f,%3.2f
+---,,,mag,mag,mag,mag,mag,mag,mag,mag,mag,mag,mag,mag,mag
+"The Catalogue of Principal Galaxies (PGC) Number","Reference code: 1NN=IR Ceph; 2NN=IR RRLy; 3NN=TRGB; 4NN=FGCR; 5NN=Eclipsing binary","Commen name","Distance modulus: IR Cepheid method","Random error in IR Ceph distance modulus","Systematic error in IR Ceph distance modulus","Distance modulus: IR RR Lyrae method","Random error in IR RR Lyrae distance modulus","Systematic error in IR RR Lyrae distance modulus","Distance modulus: Tip of the Giant Branch method","Random error in TRGB distance modulus","Systematic error in TRGB distance modulus","Distance modulus: Flux-weighted Gravity-Luminosity Relationship","Random error in FGLR distance modulus","Distance modulus: Eclipsing Binary method","Random error in eclipsing binary distance modulus"
+143,1,WLM,24.92,0.04,0.06,,,,25.13,0.08,0.13,24.99,0.10,,
+1014,2,NGC55,26.43,0.04,0.08,,,,,,,,,,
+2758,3,NGC247,27.64,0.04,0.08,,,,,,,,,,
+3085,4,SMC,,,,18.97,0.03,0.12,,,,,,18.96,0.05
+3238,5,NGC300,26.37,0.05,0.03,,,,26.33,0.02,0.12,,,,
+3589,6,Sculptor,,,,19.67,0.02,0.12,19.71,0.08,0.11,,,,
+3844,7,IC1613,24.29,0.04,0.04,,,,24.30,0.08,0.09,,,,
+5818,8,M33,24.62,0.07,,,,,24.84,0.10,,24.93,0.11,,
+10074,9,Fornax,,,,,,,20.84,0.04,0.13,,,,
+17223,10,LMC,,,,18.58,0.03,0.11,,,,,,18.49,0.05
+19441,11,Carina,,,,,,,20.11,0.04,0.13,,,,
+28630,12,M81,,,,,,,,,,27.70,0.10,,
+29128,13,NGC3109,25.57,0.02,0.06,,,,25.46,0.05,0.09,25.55,0.09,,
+34554,14,NGC3621,,,,,,,,,,29.07,0.09,,
+63616,15,NGC6822,23.31,0.02,0.06,,,,23.29,0.05,0.10,,,,
+73049,16,NGC7793,27.68,0.05,0.08,,,,,,,,,,
