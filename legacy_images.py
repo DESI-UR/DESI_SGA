@@ -32,7 +32,7 @@ def get_cutout(targetid, ra, dec, verbose=False):
     ############################################################################
     # Initialize returned image file name
     #---------------------------------------------------------------------------
-    img_name = 'large_gals/{}.jpg'.format(targetid)
+    img_name = 'Figures/{}.jpg'.format(targetid)
     ############################################################################
 
 
