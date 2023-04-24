@@ -1,0 +1,27 @@
+// CustomJS, callback for the "Reset X-Y range" button
+//  - Requires to include function in: adapt_plotrange.js
+//  - args = fig, xmin, xmax, spectra, widgetinfos
+
+// x-range
+fig.x_range.start = xmin
+fig.x_range.end = xmax
+if (widgetinfos.data['waveframe_active'][0] == 1) {
+    var z = parseFloat(widgetinfos.data['z_input_value'][0]) ;
+    fig.x_range.start /= (1+z) ;
+    fig.x_range.end /= (1+z) ;
+}
+
+var ymin = 0.0
+var ymax = 0.0
+for (var i=0; i<spectra.length; i++) {
+    var data = spectra[i].data
+    var tmp = adapt_plotrange(0.01, 0.99, data['plotflux'])
+    ymin = Math.min(ymin, tmp[0])
+    ymax = Math.max(ymax, tmp[1])
+}
+if(ymin<0) {
+    fig.y_range.start = ymin * 1.4
+} else {
+    fig.y_range.start = ymin * 0.6
+}
+fig.y_range.end = ymax * 1.4
