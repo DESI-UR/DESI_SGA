@@ -110,6 +110,8 @@ def hyperfit_line(x, y, dx, dy, bounds):
 
     mcmc_samples : ndarray of shape (3,M)
         Flattened values from the MCMC chain for each of the three parameters
+
+    hf : hyperfit object
     '''
 
     N = len(x) # Number of data points
@@ -148,7 +150,7 @@ def hyperfit_line(x, y, dx, dy, bounds):
     cov = np.cov(mcmc_samples)
     ############################################################################
 
-    return a, b, sig, cov, mcmc_samples
+    return a, b, sig, cov, mcmc_samples, hf
 ################################################################################
 ################################################################################
 
@@ -262,7 +264,7 @@ def chi2_line(x, y, dx, dy, p0, limits):
     da = uncertainties[0]
     db = uncertainties[1]
     '''
-    cov = result.hess_inv.to_dense()
+    cov = result.hess_inv.todense()
     ############################################################################
 
     return a, b, cov, result
@@ -326,6 +328,124 @@ def lls_line(x, y, dy):
 ################################################################################
 
 
+
+
+
+################################################################################
+# Custom linear least squares with scatter in x
+#-------------------------------------------------------------------------------
+def chi2_sigmax(params, x, y, dx, dy):
+    '''
+    Calculate the chi2 for the line, y = ax + b, assuming that there is some 
+    additional scatter in the x-direction.
+
+
+    PARAMETERS
+    ==========
+
+    params : list of length 3
+        best-fit parameters: [a, b, sigma_x]
+
+    x, y : ndarrays of shape (N,)
+        (x, y) data points to which we are fitting the line
+
+    dx, dy : ndarrays of shape (N,)
+        Uncertainties in x and y
+
+
+    RETURNS
+    =======
+
+    chi2 : float
+        chi2 for the current values in params
+    '''
+
+
+    a, b, sigma_x = params
+
+    Delta_y = y - (a*x + b)
+
+    delta2 = dy**2 + a**2 * (dx**2 + sigma_x**2)
+
+    chi2 = np.sum(Delta_y**2 / delta2)
+
+    return chi2
+
+
+
+def chi2_line_sigmax(x, y, dx, dy, p0, limits):
+    '''
+    Fit a line, y = ax + b, assuming that there is some additional scatter in 
+    the x-direction.  This fit accepts uncertainties in both x and y.
+
+
+    PARAMETERS
+    ==========
+
+    x, y : ndarrays of shape (N,)
+        (x, y) data points to which we are fitting the line
+
+    dx, dy : ndarrays of shape (N,)
+        Uncertainties in x and y
+
+    p0 : list of length 3
+        Initial guesses for the slope, y-intercept, and x-scatter
+
+    limits : list of length 3
+        Lower and upper limits for the slope, y-intercept, and x-scatter:
+            [(slope minimum, slope maximum), 
+             (y-intercept minimum, y-intercept maximum), 
+             (x-scatter minimum, x-scatter maximum)]
+
+
+    RETURNS
+    =======
+
+    a : float
+        best-fit value for the slope
+
+    b : float
+        best-fit value for the y-intercept
+
+    sigma_x : float
+        best-fit value for the additional scatter in the x-direction
+
+    cov : ndarray of shape (3,3)
+        Covariance matrix between a, b, and sigma_x
+
+    result : 
+        Output from scipy.optimize.minimize
+    '''
+
+
+    ############################################################################
+    # Fit using scipy.optimize.minimize
+    #---------------------------------------------------------------------------
+    result = minimize(chi2_sigmax, 
+                      p0, 
+                      args=(x, y, dx, dy), 
+                      bounds=limits)
+    ############################################################################
+
+
+    ############################################################################
+    # Extract the best-fit parameters
+    #---------------------------------------------------------------------------
+    a = result.x[0]
+    b = result.x[1]
+    sigma_x = result.x[2]
+
+    '''
+    uncertainties = np.sqrt(np.diag(result.hess_inv.to_dense()))
+    da = uncertainties[0]
+    db = uncertainties[1]
+    '''
+    cov = result.hess_inv.todense()
+    ############################################################################
+
+    return a, b, sigma_x, cov, result
+################################################################################
+################################################################################
 
 
 
