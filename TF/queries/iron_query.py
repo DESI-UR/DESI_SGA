@@ -1,3 +1,12 @@
+from astropy.table import Table, vstack, hstack
+
+import psycopg2
+
+from tqdm.notebook import tqdm_notebook
+
+import time
+
+
 def match_targets(pvtargtab, redux='daily', search='healpix'):
     """Match PV targets against the redshift DB for a particular spectroscopic reduction.
     
@@ -89,5 +98,25 @@ def match_targets(pvtargtab, redux='daily', search='healpix'):
     return desi_targets
 
 
-if __name__ = "main": 
-    match_targets(
+if __name__ == "__main__":
+    
+    start_time = time.time()
+    
+    # Read in target lists (made by Khaled Said)
+    pv_ext = Table.read('/global/homes/k/ksaid/desi_pv/savepath_dr9_corr/pv_ext.fits', hdu=1)
+    pv_sga = Table.read('/global/homes/k/ksaid/desi_pv/savepath_dr9_corr/pv_sga.fits', hdu=1)
+    pv_tf = Table.read('/global/homes/k/ksaid/desi_pv/savepath_dr9_corr/pv_tf.fits', hdu=1)
+    
+    # Run SQL query for each of the target lists
+    pv_ext_iron = match_targets(pv_ext, redux='iron')
+    pv_sga_iron = match_targets(pv_sga, redux='iron')
+    pv_tf_iron = match_targets(pv_tf, redux='iron')
+    
+    print('Time to execute query:', time.time() - start_time)
+
+    # Combine all target observations into a single table
+    pv_iron = vstack([pv_ext_iron, pv_sga_iron, pv_tf_iron])
+    
+    # Save full observation table to disk
+    pv_iron.write('desi_pv_tf_iron_healpix.fits', overwrite=True)
+
