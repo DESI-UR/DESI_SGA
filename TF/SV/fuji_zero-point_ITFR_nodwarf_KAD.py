@@ -13,7 +13,7 @@ from astropy.table import Table
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
-# import corner
+import corner
 
 # import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ from help_functions import adjust_lightness
 
 
 
-
+'''
 ################################################################################
 # Constants
 #-------------------------------------------------------------------------------
@@ -435,7 +435,7 @@ temp_infile = open('mcmc_fuji_Coma_ITFR_nodwarfs1_KAD.pickle', 'rb')
 (cov_w, cov_itfr, itfr_mcmc_samples, tfr_mcmc_samples) = pickle.load(temp_infile)
 temp_infile.close()
 #-------------------------------------------------------------------------------
-
+'''
 
 #-------------------------------------------------------------------------------
 # 0-pt info
@@ -448,7 +448,7 @@ temp_infile.close()
 
 
 
-
+'''
 ################################################################################
 # Calculate the calibrated slope, 0-pt, and uncertainties
 #-------------------------------------------------------------------------------
@@ -473,12 +473,36 @@ for i in range(N_samples):
     
 edges = np.nanpercentile(yvals_random, [16, 84], axis=0)
 ################################################################################
-
+'''
 
 
 
 ################################################################################
-# Plot
+# Corner plot
+#-------------------------------------------------------------------------------
+fig = corner.corner(tfr_samples.T, bins=30, smooth=1,
+                    range=[[-13, -4], [-23, -21.75]],   # Range for a, b. Adjust as needed.
+                    labels=['$a$', '$b$'],
+                    levels=(1-np.exp(-0.5), 1-np.exp(-2)),
+                    quantiles=[0.16, 0.5, 0.84],
+                    color='tab:blue',
+                    hist_kwargs={'histtype':'stepfilled', 'alpha':0.3},
+                    plot_datapoints=False,
+                    fill_contours=True,
+                    show_titles=True,
+                    title = {'0-pt calibration'},
+                    title_kwargs={"fontsize": 14})
+
+plt.savefig('../../Figures/SV/fuji_0pt_corner_nodwarfs1_20240130.png', 
+            dpi=150, 
+            facecolor='none')
+################################################################################
+
+
+
+'''
+################################################################################
+# Scatter plot
 #-------------------------------------------------------------------------------
 # Pack info into data
 #-------------------------------------------------------------------------------
@@ -538,3 +562,4 @@ plt.savefig('../../Figures/SV/fuji_0pt_TFR_nodwarf1_20230821.png',
             facecolor='none')
 #-------------------------------------------------------------------------------
 ################################################################################
+'''
