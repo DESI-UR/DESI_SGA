@@ -614,8 +614,8 @@ ax_histy.hist(SGA_MaNGA['V_0p33R26'][final_sample] - SGA_MaNGA['Vfit_corr_0p33R2
 
 ax_histy.tick_params(axis='y', labelleft=False)
 
-# plt.tight_layout()
-
 plt.savefig('../../Figures/MaNGA_dr17/MaNGA_fuji_deltaV0p33R26-vs-deltaPhi_wHist_20240424.png', 
             dpi=150, bbox_inches='tight')
+# bbox_inches='tight' is being used to keep savefig() from cutting off the axis 
+# labels; tight_layout wasn't working with these subplots.
 ################################################################################
