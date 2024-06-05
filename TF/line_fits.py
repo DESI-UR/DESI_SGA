@@ -9,6 +9,7 @@ This is a collection of the various methods of fitting a line to data.
 import numpy as np
 
 from hyperfit.linfit import LinFit
+from hyperfit_v2 import MultiLinFit
 
 from scipy.optimize import minimize
 ################################################################################
@@ -16,6 +17,9 @@ from scipy.optimize import minimize
 
 
 
+################################################################################
+# Invert the slope and y-intercept
+#-------------------------------------------------------------------------------
 def param_invert(w0, w1, cov):
     '''
     Convert the slope and y-intercept from the fit
@@ -70,6 +74,8 @@ def param_invert(w0, w1, cov):
     ############################################################################
 
     return a, b, cov_ab
+################################################################################
+################################################################################
 
 
 
@@ -129,9 +135,9 @@ def hyperfit_line(x, y, dx, dy, bounds):
 
 
     ############################################################################
-    # Create the hyperfit object
+    # Create the hacked hyperfit object
     #---------------------------------------------------------------------------
-    hf = LinFit([x, y], cov)
+    hf = MultiLinFit([x, y], cov)
     ############################################################################
 
 
@@ -146,6 +152,120 @@ def hyperfit_line(x, y, dx, dy, bounds):
     # Calculate parameter values and covariance matrix
     #---------------------------------------------------------------------------
     a, b, sig = np.median(mcmc_samples, axis=1)
+
+    cov = np.cov(mcmc_samples)
+    ############################################################################
+
+    return a, b, sig, cov, mcmc_samples, hf
+################################################################################
+################################################################################
+
+
+
+
+################################################################################
+# Fitting using the hacked version of hyperfit (for multiple data sets)
+#-------------------------------------------------------------------------------
+def hyperfit_line_multi(x, y, dx, dy, bounds):
+    '''
+    Fit a line, y = ax + b, to the data, using a hacked version of the hyperfit 
+    package.  This accepts uncertainties in both x and y.
+
+
+    PARAMETERS
+    ==========
+    
+    x, y : lists with length M of ndarrays of shape (N,)
+        (x, y) values to fit the line to.
+        
+        Note that each (xi, yi) pair must have the same length, but all xi do 
+        not need to have the same length.
+
+    dx, dy : lists with length M of ndarrays of shape (N,)
+        Uncertainties in x and y.
+        
+        Note that each (dxi, dyi) pair must have the same length (and match the 
+        length of the corresponding (xi, yi) pair).
+
+    bounds : length-(2M + 1) tuple of (min, max)
+        The lower and upper bounds for each fit parameter:
+          1. (slope minimum, slope maximum)
+          2. (y-intercept minimum, y-intercept maximum) x M
+          3. (scatter minimum, scatter maximum) x M
+
+
+    RETURNS
+    =======
+
+    a : float
+        slope best-fit value
+        
+    b, sig : ndarrays of shape (M,)
+        y-intercept and scatter best-fit values for each of the M data sets
+
+    cov : ndarray of shape (2M + 1, 2M + 1)
+        Covariance matrix of the fit
+
+    mcmc_samples : ndarray of shape (2M + 1, P)
+        Flattened values from the MCMC chain for each of the 2M + 1 parameters
+
+    hf : hyperfit object
+    '''
+    
+    M = len(x) # Number of data sets
+
+    ############################################################################
+    # Pack data for MultiLinFit class
+    #---------------------------------------------------------------------------
+    datasets = [] # list of (2xN) arrays of the data
+    covs = []     # list of covariance matrices for each data set
+    
+    for j in range(M):
+        
+        #-----------------------------------------------------------------------
+        # Create covariance matrix (This assumes that x and y are independent.)
+        #-----------------------------------------------------------------------
+        N = len(x[j]) # Number of data points in the jth data set
+        
+        cov = np.empty((2, 2, N))
+
+        for i in range(N):
+            cov[:,:,i] = np.array([[dx[j][i]**2, 0.], [0., dy[j][i]**2]])
+        #-----------------------------------------------------------------------
+        covs.append(cov)
+        #-----------------------------------------------------------------------
+        # Create data object
+        #-----------------------------------------------------------------------
+        data = np.empty((2, N))
+        
+        data[0] = x[j]
+        data[1] = y[j]
+        #-----------------------------------------------------------------------
+        datasets.append(data)
+    ############################################################################
+
+
+    ############################################################################
+    # Create the hyperfit object
+    #---------------------------------------------------------------------------
+    hf = MultiLinFit(datasets, covs)
+    ############################################################################
+
+
+    ############################################################################
+    # Run MCMC to fit line
+    #---------------------------------------------------------------------------
+    mcmc_samples, mcmc_lnlike = hf.emcee(bounds, verbose=True)
+    ############################################################################
+
+
+    ############################################################################
+    # Calculate parameter values and covariance matrix
+    #---------------------------------------------------------------------------
+    best_fits = np.median(mcmc_samples, axis=1)
+    a = best_fits[0]
+    b = best_fits[1:M+2]
+    sig = best_fits[M+2:]
 
     cov = np.cov(mcmc_samples)
     ############################################################################
