@@ -76,9 +76,14 @@ class MultiLinFit:
         self.data = None
         self.cov = None
         
-        self.npars = 1 + self.nsets # slope + intercepts + sigmas
+        if self.ndata[-1] < 3:
+            # The last data set has too few points to have a quantifiable scatter
+            self.npars = 1 + self.nsets - 1
+            self.params_scatter = np.zeros(self.nsets - 1)
+        else:
+            self.npars = 1 + self.nsets # slope + intercepts + sigmas
+            self.params_scatter = np.zeros(self.nsets)
         self.params = np.zeros(self.npars)
-        self.params_scatter = np.zeros(self.nsets)
         
         self.weights = [np.ones(n) for n in self.ndata] if weights is None else weights
         self.vertaxis = vertaxis
@@ -95,10 +100,15 @@ class MultiLinFit:
             self.cov  = self.covs[i]
             
             # Set up parameter and bounds arrays for each data set.
-            pars_i = np.array([params[0]] + [params[1+i]] + [params[self.nsets+1+i]])
-            bounds_i = [self.param_bounds[0]] + \
-                       [self.param_bounds[1+i]] + \
-                       [self.param_bounds[self.nsets+1+i]]
+            if self.ndata[-1] > 2:
+                pars_i = np.array([params[0]] + [params[1+i]] + [params[self.nsets+1+i]])
+                bounds_i = [self.param_bounds[0]] + \
+                           [self.param_bounds[1+i]] + \
+                           [self.param_bounds[self.nsets+1+i]]
+            else:
+                pars_i = np.array([params[0]] + [params[1+i]])
+                bounds_i = [self.param_bounds[0]] + \
+                           [self.param_bounds[1+i]]
 
             # Set up weights for each data set.
             weights = self.weights[i]
@@ -120,7 +130,12 @@ class MultiLinFit:
     
     # Log likelihood function.
     def _lnlike(self, params):
-        a, b, sigma = params
+        
+        if len(params) > 2:
+            a, b, sigma = params
+        else:
+            a, b = params
+            sigma = 0
 
         x, dx2 = self.data[0], self.cov[0,0]
         y, dy2 = self.data[1], self.cov[1,1]
@@ -144,7 +159,13 @@ class MultiLinFit:
         sigma_corr : ndarray
             1xM array of corrected scatter parameters.
         """
-        sigma_corr = (np.sqrt(0.5 * self.ndata) * np.exp(loggamma(0.5 * (self.ndata - self.ndims)) - loggamma(0.5 * (self.ndata - self.ndims + 1.0)))) * sigma
+        
+        if self.ndata[-1] < 3:
+            ndata = self.ndata[:-1]
+        else:
+            ndata = self.ndata
+            
+        sigma_corr = (np.sqrt(0.5 * ndata) * np.exp(loggamma(0.5 * (ndata - self.ndims)) - loggamma(0.5 * (ndata - self.ndims + 1.0)))) * sigma
 
         return sigma_corr
     
@@ -177,8 +198,13 @@ class MultiLinFit:
         if verbose:
             print(res)
             
-        self.params = res.x[:-self.nsets]
-        self.params_scatter = np.fabs(res.x[-self.nsets:])
+        if self.ndata[-1] < 3:
+            param_lim = self.nsets-1
+        else:
+            param_lim = self.nsets
+            
+        self.params = res.x[:-param_lim]
+        self.params_scatter = np.fabs(res.x[-param_lim:])
         self.params_scatter = self.bessel_cochran(self.params_scatter)
         return self.params, self.params_scatter, -res.fun
     
