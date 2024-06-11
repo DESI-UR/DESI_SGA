@@ -31,20 +31,26 @@ def param_invert(w0, w1, cov):
     PARAMETERS
     ==========
 
-    w0, w1 : floats
-        slope (w0) and y-intercept (w1) of the fit x = w0*y + w1
+    w0 : float
+        slope of the fit x = w0*y + w1
+        
+    w1 : ndarray of shape (m,)
+        y-intercepts of the fit x = w0*y + w1
 
-    cov : ndarray of shape (2,2)
+    cov : ndarray of shape (1+m,1+m)
         Covariance matrix of w0 and w1
 
 
     RETURNS
     =======
 
-    a, b : floats
-        slope (a) and y-intercept (b) of the fit y = a*x + b
+    a : float
+        slope of the fit y = a*x + b
+        
+    b : ndarray of shape (m,)
+        y-intercepts of the fit y = a*x + b
 
-    cov_ab : ndarray of shape (2,2)
+    cov_ab : ndarray of shape (1+m,1+m)
         Covariance matrix of a and b
     '''
 
@@ -62,14 +68,23 @@ def param_invert(w0, w1, cov):
     #---------------------------------------------------------------------------
     # Generate a bunch of realizations of w0 and w1
     rng = np.random.default_rng()
-    w0_rng, w1_rng = rng.multivariate_normal([w0, w1], cov, 5000).T
+    if isinstance(w1, np.ndarray):
+        w_rng = rng.multivariate_normal([w0, *w1], cov, 5000).T
+        w1_rng = w_rng[1:]
+    else:
+        w_rng = rng.multivariate_normal([w0, w1], cov, 5000).T
+        w1_rng = w_rng[1]
+    w0_rng = w_rng[0]
 
     # Transform them from (w0, w1) space to (a, b) space
     a_rng = 1./w0_rng
     b_rng = -w1_rng/w0_rng
 
     # Calculate the covariance matrix for (a, b)
-    ab_rng = np.stack((a_rng, b_rng))
+    if isinstance(w1, np.ndarray):
+        ab_rng = np.stack((a_rng, *b_rng))
+    else:
+        ab_rng = np.stack((a_rng, b_rng))
     cov_ab = np.cov(ab_rng)
     ############################################################################
 
@@ -264,8 +279,8 @@ def hyperfit_line_multi(x, y, dx, dy, bounds):
     #---------------------------------------------------------------------------
     best_fits = np.median(mcmc_samples, axis=1)
     a = best_fits[0]
-    b = best_fits[1:M+2]
-    sig = best_fits[M+2:]
+    b = best_fits[1:M+1]
+    sig = best_fits[M+1:]
 
     cov = np.cov(mcmc_samples)
     ############################################################################
