@@ -1,0 +1,173 @@
+<HTML>
+
+<HEAD>
+<TITLE>Prototype DESI spectrum viewer - main index </TITLE>
+</HEAD>
+
+<BODY>
+<h1> Prototype DESI spectrum viewer - main index </h1>
+
+<h3> Sets of spectra sorted by exposure </h3>
+{% if exposures is not none %}
+  <ul>
+  {% for expo in exposures | sort %}
+  <li><a href="exposures/{{ expo }}/index_{{ expo }}.html">{{ expo }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> Sets of spectra sorted by pixels </h3>
+{% if pixels is not none %}
+  <ul>
+  {% for pix in pixels %}
+  <li><a href="pixels/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h2> Spectra sorted by categories </h2>
+
+<h3> BGS_ANY targets </h3>
+{% if bgs_pixels is not none %}
+  <ul>
+  {% for pix in bgs_pixels %}
+  <li><a href="bgs/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> Green circle BGS (r smaller than 19.5)  </h3>
+{% if bgsg_pix is not none %}
+  <ul>
+  {% for pix in bgsg_pix %}
+  <li><a href="bgs_greencircle/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> Blue square BGS (r larger than 19.5)  </h3>
+{% if bgsb_pix is not none %}
+  <ul>
+  {% for pix in bgsb_pix %}
+  <li><a href="bgs_bluesquare/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}      
+
+
+<h3> ELG targets </h3>
+{% if elg_pixels is not none %}
+  <ul>
+  {% for pix in elg_pixels %}
+  <li><a href="elg_targets/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+
+{% endif %}
+
+    
+<h3> Green circle ELGs (DeltaChi2 larger than 100)  </h3>
+{% if elgg_pix is not none %}
+  <ul>
+  {% for pix in elgg_pix %}
+  <li><a href="elg_greencircle/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> Blue square ELGs (DeltaChi2 in [40-100] )  </h3>
+{% if elgb_pix is not none %}
+  <ul>
+  {% for pix in elgb_pix %}
+  <li><a href="elg_bluesquare/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> Black diamond ELGs (DeltaChi2 smaller than 40)  </h3>
+{% if elgbb_pix is not none %}
+  <ul>
+  {% for pix in elgbb_pix %}
+  <li><a href="elg_blackdiamond/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+
+<h3> LRG targets </h3>
+{% if lrg_pixels is not none %}
+  <ul>
+  {% for pix in lrg_pixels %}
+  <li><a href="lrg/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> MWS targets </h3>
+{% if mws_pixels is not none %}
+  <ul>
+  {% for pix in mws_pixels %}
+  <li><a href="mws/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+
+<h3> QSO targets </h3>
+{% if qso_pixels is not none %}
+  <ul>
+  {% for pix in qso_pixels %}
+  <li><a href="qso_targets/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+
+{% endif %}
+
+<h3> Green circle QSOs (g smaller than 22.5)  </h3>
+{% if qsog_pix is not none %}
+  <ul>
+  {% for pix in qsog_pix %}
+  <li><a href="qso_greencircle/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+<h3> Blue square QSOs (g larger than 22.5)  </h3>
+{% if qsob_pix is not none %}
+  <ul>
+  {% for pix in qsob_pix %}
+  <li><a href="qso_bluesquare/{{ pix }}/index_{{ pix }}.html">{{ pix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p> Not available
+{% endif %}
+
+
+</BODY>
+</HTML>
+
