@@ -37,8 +37,8 @@ class MultiLinFit:
     Class to implement linear fits to multiple datasets, assuming a common slope 
     but different intercepts across each set.
     
-    Based on the hyperfit algorithm of Robotham and Obreschkow (PASP 2015) and the 
-    Python LinFit implementation of Howlett and Gordon
+    Based on the hyperfit algorithm of Robotham and Obreschkow (PASP 2015) and 
+    the Python LinFit implementation of Howlett and Gordon
     (https://hyperfit.readthedocs.io/en/latest/).
     
     Attributes
@@ -63,10 +63,11 @@ class MultiLinFit:
     weights : ndarray
         Array of weights for each data set. Unit weights if not specified.
     vertaxis : float
-        Specify which coordinate axis in data is the 'vertical' one. Defaults to last axis (-1).
+        Specify which coordinate axis in data is the 'vertical' one. Defaults to 
+        last axis (-1).
     """
     
-    def __init__(self, datasets, covs, weights=None, vertaxis=-1):
+    def __init__(self, datasets, covs, weights=None, vertaxis=-1, scatter=None):
         
         self.nsets = len(datasets)
         self.ndims = np.shape(datasets[0])[0]
@@ -80,11 +81,19 @@ class MultiLinFit:
         self.params = np.zeros(self.npars)
         
         # Number of scatter parameters
-        if self.ndata[-1] < 3:
-            # The last data set has too few points to have a quantifiable scatter
-            self.params_scatter = np.zeros(self.nsets - 1)
+        if scatter is None:
+            # Each data set will have its own scatter
+            self.scatter = 'all'
+            
+            if self.ndata[-1] < 3:
+                # The last data set has too few points to have a quantifiable scatter
+                self.params_scatter = np.zeros(self.nsets - 1)
+            else:
+                self.params_scatter = np.zeros(self.nsets)
         else:
-            self.params_scatter = np.zeros(self.nsets)
+            # There is one scatter for all populations
+            self.scatter = 'one'
+            self.params_scatter = np.zeros(1)
         
         self.weights = [np.ones(n) for n in self.ndata] if weights is None else weights
         self.vertaxis = vertaxis
@@ -101,15 +110,21 @@ class MultiLinFit:
             self.cov  = self.covs[i]
             
             # Set up parameter and bounds arrays for each data set.
-            if self.ndata[i] > 2:
-                pars_i = np.array([params[0]] + [params[1+i]] + [params[self.nsets+1+i]])
+            if self.scatter == 'one':
+                pars_i = np.array([params[0]] + [params[1+i]] + [params[-1]])
                 bounds_i = [self.param_bounds[0]] + \
                            [self.param_bounds[1+i]] + \
-                           [self.param_bounds[self.nsets+1+i]]
+                           [self.param_bounds[-1]]
             else:
-                pars_i = np.array([params[0]] + [params[1+i]])
-                bounds_i = [self.param_bounds[0]] + \
-                           [self.param_bounds[1+i]]
+                if self.ndata[i] > 2:
+                    pars_i = np.array([params[0]] + [params[1+i]] + [params[self.nsets+1+i]])
+                    bounds_i = [self.param_bounds[0]] + \
+                               [self.param_bounds[1+i]] + \
+                               [self.param_bounds[self.nsets+1+i]]
+                else:
+                    pars_i = np.array([params[0]] + [params[1+i]])
+                    bounds_i = [self.param_bounds[0]] + \
+                               [self.param_bounds[1+i]]
 
             # Set up weights for each data set.
             weights = self.weights[i]
@@ -161,10 +176,13 @@ class MultiLinFit:
             1xM array of corrected scatter parameters.
         """
         
-        if self.ndata[-1] < 3:
-            ndata = self.ndata[:-1]
+        if self.scatter == 'one':
+            ndata = np.sum(self.ndata)
         else:
-            ndata = self.ndata
+            if self.ndata[-1] < 3:
+                ndata = self.ndata[:-1]
+            else:
+                ndata = self.ndata
             
         sigma_corr = (np.sqrt(0.5 * ndata) * np.exp(loggamma(0.5 * (ndata - self.ndims)) - loggamma(0.5 * (ndata - self.ndims + 1.0)))) * sigma
 
@@ -199,10 +217,13 @@ class MultiLinFit:
         if verbose:
             print(res)
             
-        if self.ndata[-1] < 3:
-            param_lim = self.nsets-1
+        if self.scatter == 'one':
+            param_lim = 1
         else:
-            param_lim = self.nsets
+            if self.ndata[-1] < 3:
+                param_lim = self.nsets-1
+            else:
+                param_lim = self.nsets
             
         self.params = res.x[:-param_lim]
         self.params_scatter = np.fabs(res.x[-param_lim:])
@@ -215,6 +236,7 @@ class MultiLinFit:
               batchsize=1000, 
               ntau=50.0, 
               tautol=0.05, 
+              skip_initial_state_check=False,
               verbose=False):
         """
         Run MCMC using the emcee EnsembleSampler.
@@ -236,6 +258,9 @@ class MultiLinFit:
         tautol : float
             Maximum fractional deviation between successive autocorrelation 
             lengths for convergence.
+        skip_initial_state_check : bool
+            Whether or not to check the initial state.  Default is False (check 
+            state).
         verbose : bool
             Print out convergence statistics and progress bars if True.
             
@@ -252,15 +277,29 @@ class MultiLinFit:
         self.optimize(bounds, verbose=verbose)
         ndim = len(self.params) + len(self.params_scatter)
         nwalker = 4 * ndim
-        seeds = np.asarray([[(0.01 * np.random.rand() + 0.995) * j for j in np.concatenate([self.params, self.params_scatter])] for _ in range(nwalker)])
+        seeds = np.asarray([
+            [(0.01 * np.random.rand() + 0.995) * j for j in np.concatenate([self.params, self.params_scatter])] 
+            for _ in range(nwalker)
+        ])
+        
+        if verbose:
+            if np.any(np.isinf(seeds)):
+                print('Some of the seeds are infinite!')
+            elif np.any(np.isnan(seeds)):
+                print('Some of the seeds are NaN!')
 
+            print(f'Ndim: {ndim} {self.nsets}')
+        
         sampler = emcee.EnsembleSampler(nwalker, ndim, self._lnpost)
 
         old_tau = np.inf
         niter = 0
         converged = 0
         while ~converged:
-            sampler.run_mcmc(seeds, nsteps=batchsize, progress=verbose)
+            sampler.run_mcmc(seeds, 
+                             nsteps=batchsize, 
+                             progress=verbose, 
+                             skip_initial_state_check=skip_initial_state_check)
             tau = sampler.get_autocorr_time(discard=int(0.5 * niter), tol=0)
             converged = np.all(ntau * tau < niter)
             converged &= np.all(np.abs(old_tau - tau) / tau < tautol)

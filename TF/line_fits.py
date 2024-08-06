@@ -179,9 +179,9 @@ def hyperfit_line(x, y, dx, dy, bounds):
 
 
 ################################################################################
-# Fitting using the hacked version of hyperfit (for multiple data sets)
+# Fitting using the subclassed version of hyperfit (for multiple data sets)
 #-------------------------------------------------------------------------------
-def hyperfit_line_multi(x, y, dx, dy, bounds):
+def hyperfit_line_multi(x, y, dx, dy, bounds, scatter=None):
     '''
     Fit a line, y = ax + b, to the data, using a hacked version of the hyperfit 
     package.  This accepts uncertainties in both x and y.
@@ -207,6 +207,12 @@ def hyperfit_line_multi(x, y, dx, dy, bounds):
           1. (slope minimum, slope maximum)
           2. (y-intercept minimum, y-intercept maximum) x M
           3. (scatter minimum, scatter maximum) x M
+          
+    scatter : None or something else
+        Determines whether there is just one scatter parameter used for all data 
+        sets or an individual scatter parameter for each data set (None).  If 
+        the latter, then no scatter parameter will be used if the last data set 
+        contains less than three objects.
 
 
     RETURNS
@@ -263,7 +269,7 @@ def hyperfit_line_multi(x, y, dx, dy, bounds):
     ############################################################################
     # Create the hyperfit object
     #---------------------------------------------------------------------------
-    hf = MultiLinFit(datasets, covs)
+    hf = MultiLinFit(datasets, covs, scatter=scatter)
     ############################################################################
 
 
