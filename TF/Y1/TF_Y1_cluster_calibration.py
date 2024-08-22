@@ -144,13 +144,14 @@ for k in range(m):
     eb = ax.errorbar(x=logV[k+1] + logV0, y=mag[k+1], xerr=logV_err[k+1], yerr=mag_err[k+1],
                      fmt='.', label=f'{_cluster_ids[k]}')
 
-    ax.plot(_logv + logV0, a_*_logv + b_[k], color=eb[0].get_color(), ls='--', alpha=0.5, label='fit')
+    ax.plot(_logv + logV0, a_*_logv + b_[k], color=eb[0].get_color(), ls='--', alpha=0.5)#, label='fit')
 
 ax.set(xlim=[1.25, 2.75],
        ylim=[18, 13])
-ax.set_xlabel(r'$\log{(V_{0.4R_{26}}~[\mathrm{km/s}]}$)', fontsize=14)
-ax.set_ylabel(r'$m_r (26)$', fontsize=14)
-ax.legend(loc='upper left', fontsize=9, ncol=2);
+ax.tick_params(axis='both', which='major', labelsize=14)
+ax.set_xlabel(r'$\log{(V_{0.4R_{26}}~[\mathrm{km/s}]}$)', fontsize=16)
+ax.set_ylabel(r'$m_r (26)$', fontsize=16)
+ax.legend(loc='upper left', fontsize=12, ncol=2);
 #-------------------------------------------------------------------------------
 # Plot calibrators
 ax = axes[1]#[0,1]
@@ -160,9 +161,10 @@ eb = ax.errorbar(x=logV[0] + logV0, y=mag[0], xerr=logV_err[0], yerr=mag_err[0],
 ax.plot(_logv + logV0, a_*_logv + b0pt, color=eb[0].get_color(), ls='--', label='fit')
 ax.set(xlim=[1.25, 2.75],
        ylim=[-16.75, -23])
-ax.set_xlabel(r'$\log{(V_{0.4R_{26}}~[\mathrm{km/s}]}$)', fontsize=14)
-ax.set_ylabel(r'$M_r(26) = m_r(26) - \mu$', fontsize=14)
-ax.legend(loc='upper left', fontsize=9, ncol=2)
+ax.tick_params(axis='both', which='major', labelsize=14)
+ax.set_xlabel(r'$\log{(V_{0.4R_{26}}~[\mathrm{km/s}]}$)', fontsize=16)
+ax.set_ylabel(r'$M_r(26) = m_r(26) - \mu$', fontsize=16)
+ax.legend(loc='upper left', fontsize=12, ncol=2)
 '''
 #-------------------------------------------------------------------------------
 # Plot residuals: clusters
