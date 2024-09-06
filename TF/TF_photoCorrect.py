@@ -39,14 +39,14 @@ def BASS_corr(gals):
     This function adjusts the northern (i.e., BASS) photometry to match DECaLS.
     '''
     # Check if the PHOTOSYS column is in the provided astropy table
-    if 'PHOTOSYS' not in gals.colnames:
-        print('Please add the PHOTOSYS column to identify the photometric survey for each object.')
-        return
+    if 'PHOTSYS' not in gals.colnames:
+        print('Please add the PHOTSYS column to identify the photometric survey for each object.')
+        return None
     
     corr = np.zeros(len(gals))
     corr_err = np.zeros(len(gals))
     
-    bass_gal = gals['PHOTOSYS'] == 'N'
+    bass_gal = gals['PHOTSYS'] == 'N'
     
     corr[bass_gal] += 0.0234
     corr_err[bass_gal] += 0.02
@@ -60,15 +60,11 @@ def BASS_corr(gals):
 ################################################################################
 # MW dust extinction
 #-------------------------------------------------------------------------------
-def MW_dust(gals):
+def MW_dust(gals, ebv_map):
     '''
     Correct for the dust extinction due to the MW's dust.  This uses Rongpu's 
     DESI dust map.
     '''
-    # Import E(B-V) dust map
-    ebv_directory = '/global/cfs/cdirs/desicollab/users/rongpu/dust/desi_ebv/public_data/maps/'
-    ebv_filename = 'desi_ebv_gr_512.fits'
-    ebv_map = Table.read(ebv_directory + ebv_filename)
     
     # Create a dictionary of healpixel coordinates for the map
     ebv_map_dict = {}
@@ -93,8 +89,8 @@ def MW_dust(gals):
     for i in range(len(gals)):
         if gal_hpCoords[i] in ebv_map_dict.keys():
             i_ebv = ebv_map_dict[gal_hpCoords[i]]
-            EBV[i] = ebv_map['EBV'][i_ebv]
-            EBV_err[i] = ebv_map['EBV_ERR'][i_ebv]
+            EBV[i] = ebv_map['EBV_GR'][i_ebv]
+            EBV_err[i] = ebv_map['EBV_GR_ERR'][i_ebv]
             
     # Compute dust extinction correction
     # A_dust = Rr E(B-V)
