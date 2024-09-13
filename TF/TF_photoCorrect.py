@@ -29,7 +29,7 @@ import kcorrect.kcorrect
 #
 # This function adjusts the northern (i.e., BASS) photometry to match DECaLS.
 #-------------------------------------------------------------------------------
-def BASS_corr(gals):
+def BASS_corr(photsys):
     '''
     Khaled found that there is a systematic offset in the magnitudes between 
     BASS and DECaLS:
@@ -38,15 +38,10 @@ def BASS_corr(gals):
     
     This function adjusts the northern (i.e., BASS) photometry to match DECaLS.
     '''
-    # Check if the PHOTOSYS column is in the provided astropy table
-    if 'PHOTSYS' not in gals.colnames:
-        print('Please add the PHOTSYS column to identify the photometric survey for each object.')
-        return None
+    corr = np.zeros(len(photsys))
+    corr_err = np.zeros(len(photsys))
     
-    corr = np.zeros(len(gals))
-    corr_err = np.zeros(len(gals))
-    
-    bass_gal = gals['PHOTSYS'] == 'N'
+    bass_gal = photsys == 'N'
     
     corr[bass_gal] += 0.0234
     corr_err[bass_gal] += 0.02
@@ -60,7 +55,7 @@ def BASS_corr(gals):
 ################################################################################
 # MW dust extinction
 #-------------------------------------------------------------------------------
-def MW_dust(gals, ebv_map):
+def MW_dust(ra, dec, ebv_map):
     '''
     Correct for the dust extinction due to the MW's dust.  This uses Rongpu's 
     DESI dust map.
@@ -80,13 +75,14 @@ def MW_dust(gals, ebv_map):
     hp = HEALPix(nside=512, order='ring', frame=ICRS())
     
     # Compute HEALPix index of each galaxy
-    gal_skyCoords = SkyCoord(ra=gals['RA']*u.deg, dec=gals['DEC']*u.deg)
+    gal_skyCoords = SkyCoord(ra=ra*u.deg, dec=dec*u.deg)
     gal_hpCoords = hp.skycoord_to_healpix(gal_skyCoords)
     
     # Extract E(B-V) values for each galaxy
-    EBV = np.zeros(len(gals))
-    EBV_err = np.zeros(len(gals))
-    for i in range(len(gals)):
+    N_gals = len(ra)
+    EBV = np.zeros(N_gals)
+    EBV_err = np.zeros(N_gals)
+    for i in range(N_gals):
         if gal_hpCoords[i] in ebv_map_dict.keys():
             i_ebv = ebv_map_dict[gal_hpCoords[i]]
             EBV[i] = ebv_map['EBV_GR'][i_ebv]
@@ -121,22 +117,22 @@ def err2ivar(error, maggie):
     return mag_ivar/np.square(0.4*np.log(10)*maggie)
 
 
-def k_corr(gals, z_corr=0.05):
+def k_corr(z, m, m_err, z_corr=0.05):
     '''
     Compute K-corrections
     '''
     filters = ['decam_g', 'decam_r', 'decam_z']
     kc = kcorrect.kcorrect.Kcorrect(responses=filters)
     
-    magnitude = [gals['G_MAG_SB26'], gals['R_MAG_SB26'], gals['Z_MAG_SB26']]
-    maggies = mag2maggies(np.array(magnitude).T)
+    # magnitude = [gals['G_MAG_SB26'], gals['R_MAG_SB26'], gals['Z_MAG_SB26']]
+    maggies = mag2maggies(np.array(m).T)
     
-    mag_errors = [gals['G_MAG_SB26_ERR'], gals['R_MAG_SB26_ERR'], gals['Z_MAG_SB26_ERR']]
-    ivar = err2ivar(np.array(mag_errors).T, maggies)
+    # mag_errors = [gals['G_MAG_SB26_ERR'], gals['R_MAG_SB26_ERR'], gals['Z_MAG_SB26_ERR']]
+    ivar = err2ivar(np.array(m_err).T, maggies)
     
-    coeffs = kc.fit_coeffs(redshift=gals['Z_DESI'], maggies=maggies, ivar=ivar)
+    coeffs = kc.fit_coeffs(redshift=z, maggies=maggies, ivar=ivar)
     
-    k = kc.kcorrect(redshift=gals['Z_DESI'], coeffs=coeffs, band_shift=z_corr)
+    k = kc.kcorrect(redshift=z, coeffs=coeffs, band_shift=z_corr)
     
     return k
 ################################################################################
