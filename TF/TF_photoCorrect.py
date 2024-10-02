@@ -69,7 +69,8 @@ def MW_dust(ra, dec, ebv_map):
     # Ratio of total to selective extinction (rederived from Schalfly11 and 
     # listed in 
     # https://www.legacysurvey.org/dr10/catalogs/#galactic-extinction-coefficients
-    Rr = 2.165
+    # [Rg, Rr, Rz]
+    R = np.array([3.214, 2.165, 1.211])
     
     # nside and order values are specific to the E(B-V) map used
     hp = HEALPix(nside=512, order='ring', frame=ICRS())
@@ -89,9 +90,9 @@ def MW_dust(ra, dec, ebv_map):
             EBV_err[i] = ebv_map['EBV_GR_ERR'][i_ebv]
             
     # Compute dust extinction correction
-    # A_dust = Rr E(B-V)
-    Adust = Rr*EBV
-    Adust_err = Rr*EBV_err
+    # A_dust = R E(B-V)
+    Adust = np.outer(R, EBV)
+    Adust_err = np.outer(R, EBV_err)
     
     return Adust, Adust_err
 ################################################################################
