@@ -137,3 +137,35 @@ def k_corr(z, m, m_err, z_corr=0.05):
     
     return k
 ################################################################################
+
+
+
+
+################################################################################
+# Internal dust extinction
+#-------------------------------------------------------------------------------
+def internal_dust(ba, coeffs, coeffs_err):
+    '''
+    Compute internal dust correction.  This is based on a linear fit to remove 
+    residual correlation between b/a and the r-band magnitude.  These 
+    coefficients need to be computed prior to using this function.
+    '''
+    if np.isscalar(ba):
+        if ba < 0.7:
+            dm = coeffs[0]*(ba - 0.7)
+            dm_err = coeffs_err[0]*(ba - 0.7)
+        else:
+            dm = 0
+            dm_err = 0
+    
+    else:
+        dm = np.zeros(len(ba))
+        dm_err = np.zeros(len(ba))
+        
+        to_correct = ba < 0.7
+        
+        dm[to_correct] = coeffs[0]*(ba[to_correct] - 0.7)
+        dm_err[to_correct] = coeffs_err[0]*(ba[to_correct] - 0.7)
+    
+    return dm, dm_err
+################################################################################
