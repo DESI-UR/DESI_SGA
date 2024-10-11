@@ -102,25 +102,24 @@ if __name__ == "__main__":
     
     start_time = time.time()
     
-    # Read in target lists (made by Khaled Said)
+    # Read in target lists
     pv_ext = Table.read('/global/cfs/projectdirs/desi/science/td/pv/desi_pv/savepath_dr9_corr/pv_ext.fits', hdu=1)
     pv_sga = Table.read('/global/cfs/projectdirs/desi/science/td/pv/desi_pv/savepath_dr9_corr/pv_sga.fits', hdu=1)
     pv_tf = Table.read('/global/cfs/projectdirs/desi/science/td/pv/desi_pv/savepath_dr9_corr/pv_tf.fits', hdu=1)
+    print('Read in file')
+    
     
     # Run SQL query for each of the target lists
-    pv_ext_iron = match_targets(pv_ext, redux='iron')
-    
-    pv_sga_iron = match_targets(pv_sga, redux='iron')
-    pv_sga_iron.write('pv_sga_iron.fits', overwrite=True)
-    
-    pv_tf_iron = match_targets(pv_tf, redux='iron')
-    pv_tf_iron.write('pv_tf_iron.fits', overwrite=True)
+    pv_ext_jura = match_targets(pv_ext, redux='jura')
+    pv_sga_jura = match_targets(pv_sga, redux='jura')
+    pv_tf_jura = match_targets(pv_tf, redux='jura')
+    print('ran queries')
     
     print('Time to execute query:', time.time() - start_time)
 
     # Combine all target observations into a single table
-    pv_iron = vstack([pv_ext_iron, pv_sga_iron, pv_tf_iron])
+    pv_jura = vstack([pv_ext_jura, pv_sga_jura, pv_tf_jura])
     
     # Save full observation table to disk
-    pv_iron.write('desi_pv_tf_iron_healpix.fits', overwrite=True)
+    pv_ext_jura.write('desi_pv_tf_jura_healpix_test2.fits', overwrite=True)
 
