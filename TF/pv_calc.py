@@ -18,7 +18,8 @@ import astropy.units as u
 ################################################################################
 # Constants
 #-------------------------------------------------------------------------------
-h = 1
+# h = 1 # EDR
+h = 0.7742 # DR1
 H0 = 100*h*u.km/u.s/u.Mpc
 
 c = const.c.to('km/s')
@@ -34,12 +35,19 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-data_directory = 'SV/'
+# data_directory = 'SV/'
+data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
-filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
 
 galaxies = Table.read(data_directory + filename)
+
+if data_directory == 'SV/':
+    mu_colname = 'mu_TFbright'
+elif data_directory == 'Y1/':
+    mu_colname = 'mu_TF'
 ################################################################################
 
 
@@ -67,7 +75,7 @@ def dist(mu):
     return d/1e6 # Mpc or Mpc/h
 
 
-gal_d = dist(galaxies['mu_TFbright']) # Mpc/h
+gal_d = dist(galaxies[mu_colname]) # Mpc/h or Mpc
 
 galaxies['V_PEC'] = c*galaxies['Z_DESI'] - H0*(gal_d*u.Mpc) # km/s
 #-------------------------------------------------------------------------------
@@ -80,8 +88,8 @@ for i in range(len(galaxies)):
     z_desi_random = rng.normal(galaxies['Z_DESI'][i], 
                                galaxies['ZERR_DESI'][i], 
                                size=N_samples)
-    mu_random = rng.normal(galaxies['mu_TFbright'][i], 
-                           galaxies['mu_TFbright_err'][i], 
+    mu_random = rng.normal(galaxies[mu_colname][i], 
+                           galaxies[mu_colname + '_err'][i], 
                            size=N_samples)
     
     d_random = dist(mu_random)
