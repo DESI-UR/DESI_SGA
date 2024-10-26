@@ -36,12 +36,12 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-data_directory = 'SV/'
-# data_directory = 'Y1/'
+# data_directory = 'SV/'
+data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
-filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
@@ -77,7 +77,7 @@ def vpec(z_mod, mu, c=3e5, H0=100):
     
     Default values: c = 3x10^5 km/s, H0 = 100 km/s/Mpc
     '''
-    return (c*z_mod/(1 + z_mod))*(np.log10(c*z_mod/(1e-5 * H0)) - 0.2*mu)
+    return (c*z_mod/(1 + z_mod))*(np.log(c*z_mod/(1e-5 * H0)) - 0.2*mu*np.log(10))
 
 
 Om = 0.3151 # DESI fiducial cosmology
