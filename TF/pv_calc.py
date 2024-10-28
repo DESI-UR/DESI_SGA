@@ -7,6 +7,7 @@ estimator (e.g., Tully-Fisher relation).
 # Import modules
 #-------------------------------------------------------------------------------
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 from astropy.table import Table
 from astropy.io import fits
@@ -45,7 +46,9 @@ filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
+# galaxies = hdul[1].data
 # sig_TFR = hdul[0].header['SIG']
+hdr = hdul[0].header
 hdul.close()
 
 if data_directory == 'SV/':
@@ -85,10 +88,12 @@ Om = 0.3151 # DESI fiducial cosmology
 z_mod = zmod(galaxies['Z_DESI'], Om, 1 - Om) # Assuming flat LCDM
 
 galaxies['V_PEC'] = vpec(z_mod, galaxies[mu_colname], c.value, H0.value)
+# v_pec = vpec(z_mod, galaxies[mu_colname], c.value, H0.value)
 #-------------------------------------------------------------------------------
 # Estimate uncertainty
 #-------------------------------------------------------------------------------
 galaxies['VERR_PEC'] = np.nan
+# verr_pec = np.nan*np.ones(len(galaxies))
 
 for i in range(len(galaxies)):
     
@@ -107,6 +112,12 @@ for i in range(len(galaxies)):
                        H0.value)
     
     galaxies['VERR_PEC'][i] = np.nanstd(Vpec_random)
+    # verr_pec[i] = np.nanstd(Vpec_random)
+#-------------------------------------------------------------------------------
+# galaxies1 = rfn.append_fields(galaxies, 
+#                               ['V_PEC', 'VERR_PEC'], 
+#                               [v_pec, verr_pec], 
+#                               usemask=False)
 ################################################################################
 
 
@@ -301,5 +312,11 @@ galaxies['VERR_PEC'] = c*galaxies['ZERR_PEC']
 #-------------------------------------------------------------------------------
 updated_filename = filename[:-5] + '_pec-Watkins15.fits'
 
-galaxies.write(data_directory + updated_filename, format='fits', overwrite=True)
+empty_primary = fits.PrimaryHDU(header=hdr)
+table_hdu = fits.BinTableHDU(data=galaxies)
+hdul = fits.HDUList([empty_primary, table_hdu])
+
+# galaxies.write(data_directory + updated_filename, format='fits', overwrite=True)
+hdul.writeto(data_directory + updated_filename, overwrite=True)
+# hdul.close()
 ################################################################################
