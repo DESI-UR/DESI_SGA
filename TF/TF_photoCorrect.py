@@ -150,6 +150,9 @@ def internal_dust(ba, coeffs, coeffs_err):
     residual correlation between b/a and the r-band magnitude.  These 
     coefficients need to be computed prior to using this function.
     '''
+    dm = coeffs[0]*(ba - 1)
+    dm_err = coeffs_err[0]*(ba - 1)
+    """
     if np.isscalar(ba):
         if ba < 0.7:
             dm = coeffs[0]*(ba - 0.7)
@@ -166,6 +169,6 @@ def internal_dust(ba, coeffs, coeffs_err):
         
         dm[to_correct] = coeffs[0]*(ba[to_correct] - 0.7)
         dm_err[to_correct] = coeffs_err[0]*(ba[to_correct] - 0.7)
-    
+    """
     return dm, dm_err
 ################################################################################

@@ -20,8 +20,8 @@ import astropy.units as u
 ################################################################################
 # Constants
 #-------------------------------------------------------------------------------
-# h = 1 # EDR
-h = 0.7742 # DR1
+h = 1 # EDR
+# h = 0.7742 # DR1
 H0 = 100*h*u.km/u.s/u.Mpc
 
 c = const.c.to('km/s')
@@ -37,12 +37,12 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-# data_directory = 'SV/'
-data_directory = 'Y1/'
+data_directory = 'SV/'
+# data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
-# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
+filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
