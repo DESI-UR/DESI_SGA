@@ -370,8 +370,11 @@ for sga_gal in np.unique(centers_dist['SGA_ID']):
     z_err_center2 = SGA['ZERR_DESI'][sga_idx]**2
 
     # Calculate rotational velocity for all observations of the galaxy
-    axis_dist['V_ROT'][obs_idx] = c*(axis_dist['Z'][obs_idx] - z_center)
-    axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt(axis_dist['ZERR'][obs_idx]**2 + z_err_center2)
+    # axis_dist['V_ROT'][obs_idx] = c*(axis_dist['Z'][obs_idx] - z_center)
+    # axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt(axis_dist['ZERR'][obs_idx]**2 + z_err_center2)
+    z_rot = (1 + axis_dist['Z'][obs_idx])/(1 + z_center) - 1
+    axis_dist['V_ROT'][obs_idx] = c*z_rot
+    axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_dist['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_dist['Z'][obs_idx])/(1 + z_center)**2))
     #---------------------------------------------------------------------------
     
     
@@ -958,7 +961,7 @@ ax1.set_ylabel(r'$M_r (26) - 5\log h$', fontsize=14)
 
 ax1.legend(loc='upper left')
 
-ax1.set_ylim(-19, -22)
+ax1.set_ylim(-19.5, -23)
 ax1.set_aspect('equal', adjustable='box', share=True)
 #-------------------------------------------------------------------------------
 

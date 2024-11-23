@@ -26,7 +26,7 @@ import pickle
 #-------------------------------------------------------------------------------
 # Best-fit
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs1_KAD.pickle', 'rb')
+temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_KAD.pickle', 'rb')
 cov_ab, tfr_samples, V0 = pickle.load(temp_infile)
 temp_infile.close()
 #-------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ temp_infile.close()
 # Plot the corner plot
 #-------------------------------------------------------------------------------
 fig = corner.corner(tfr_samples.T, bins=30, smooth=1,
-                    range=[[-8.2, -6.8], [15.5, 15.75], [-19.2, -18.25], [0.95, 1.2]],
+                    #range=[[-8.2, -6.8], [15.5, 15.75], [-19.2, -18.25], [0.95, 1.2]],
                     labels=['$a$', '$b_{Coma}$', '$b_{0pt}$', r'$\sigma_{Coma}$'],
                     label_kwargs={'fontsize':18}, 
                     labelpad=0.1, 
@@ -57,7 +57,7 @@ for ax in fig.get_axes():
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_20241009.png', 
+plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_20241122.png', 
             dpi=150, 
             facecolor='none', 
             bbox_inches='tight')
