@@ -1,1 +1,1 @@
-= Y3 Tully-Fisher Analysis =
+# Y3 Tully-Fisher Analysis
