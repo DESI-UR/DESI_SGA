@@ -17,7 +17,7 @@ from matplotlib.patches import Ellipse
 # import matplotlib as mpl
 
 from astropy.io import fits
-from astropy.table import Table
+from astropy.table import Table, join
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 # from astropy.visualization.wcsaxes import SphericalCircle
@@ -30,12 +30,12 @@ import corner
 
 import pickle
 
-from help_functions import adjust_lightness
-
-# import sys
-# sys.path.insert(1, '/global/u1/k/kadglass/DESI_SGA/TF/')
+import sys
+sys.path.insert(1, '/global/u1/k/kadglass/DESI_SGA/TF/')
 # #sys.path.insert(1, '/Users/kellydouglass/Documents/Research/DESI/Targets/code/TF/')
+from help_functions import adjust_lightness
 # from line_fits import param_invert, hyperfit_line
+from TF_photoCorrect import BASS_corr, MW_dust, k_corr, internal_dust
 ################################################################################
 
 
@@ -60,7 +60,7 @@ q0 = 0.2
 #-------------------------------------------------------------------------------
 # fuji
 #-------------------------------------------------------------------------------
-tfuji = Table.read('/global/cfs/projectdirs/desi/science/td/pv/desi_pv_tf_fuji_healpix.fits')
+tfuji = Table.read('/global/cfs/projectdirs/desi/science/td/pv/tfgalaxies/desi_pv_tf_fuji_healpix.fits')
 #-------------------------------------------------------------------------------
 
 
@@ -80,7 +80,7 @@ for i in range(len(SGA)):
 #-------------------------------------------------------------------------------
 # Best-fit
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs2_KAD.pickle', 'rb')
+temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_KAD.pickle', 'rb')
 cov_ab, tfr_samples, V0 = pickle.load(temp_infile)
 temp_infile.close()
 
@@ -370,8 +370,11 @@ for sga_gal in np.unique(centers_dist['SGA_ID']):
     z_err_center2 = SGA['ZERR_DESI'][sga_idx]**2
 
     # Calculate rotational velocity for all observations of the galaxy
-    axis_dist['V_ROT'][obs_idx] = c*(axis_dist['Z'][obs_idx] - z_center)
-    axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt(axis_dist['ZERR'][obs_idx]**2 + z_err_center2)
+    # axis_dist['V_ROT'][obs_idx] = c*(axis_dist['Z'][obs_idx] - z_center)
+    # axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt(axis_dist['ZERR'][obs_idx]**2 + z_err_center2)
+    z_rot = (1 + axis_dist['Z'][obs_idx])/(1 + z_center) - 1
+    axis_dist['V_ROT'][obs_idx] = c*z_rot
+    axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_dist['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_dist['Z'][obs_idx])/(1 + z_center)**2))
     #---------------------------------------------------------------------------
     
     
@@ -686,16 +689,91 @@ SGA_0pt = SGA[np.isfinite(SGA['V_0p33R26']) & (SGA['R_MAG_SB26'] > 0)]
 
 
 ################################################################################
-# Compute the absolute magnitudes for the 0-pt calibrators based on their 
-# distance moduli
+# Photometric corrections
 #-------------------------------------------------------------------------------
-SGA_0pt['R_ABSMAG_SB26'] = SGA_0pt['R_MAG_SB26'] - SGA_0pt['DM1_SN']
-SGA_0pt['R_ABSMAG_SB26_err'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR']**2 + SGA_0pt['e_DM1_SN']**2)
+# Survey offsets
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+gals_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/SV/'
+# gals_directory = '/Users/kdouglass/Documents/Research/data/DESI/SV/'
+gals_filename = 'SGA-2020_fuji_Vrot_photsys.fits'
+gals = Table.read(gals_directory + gals_filename)
+gal_photsys = gals['SGA_ID', 'PHOTSYS']
+
+# Add PHOTOSYS column to target tables
+SGA_TF = join(SGA_TF, gal_photsys, join_type='left', keys='SGA_ID')
+SGA_0pt = join(SGA_0pt, gal_photsys, join_type='left', keys='SGA_ID')
+
+# Calculate corrections
+SGA_sys_corr, SGA_sys_corr_err = BASS_corr(SGA_TF['PHOTSYS'])
+zpt_sys_corr, zpt_sys_corr_err = BASS_corr(SGA_0pt['PHOTSYS'])
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# MW dust corrections
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Import E(B-V) dust map
+ebv_directory = '/global/cfs/cdirs/desicollab/users/rongpu/dust/desi_ebv/public_data/maps/'
+# ebv_directory = '/Users/kdouglass/Documents/Research/data/DESI/'
+ebv_filename = 'desi_dust_gr_512.fits'
+ebv_map = Table.read(ebv_directory + ebv_filename)
+
+# Calculate corrections
+SGA_dust_corr, SGA_dust_corr_err = MW_dust(SGA_TF['RA'], SGA_TF['DEC'], ebv_map)
+zpt_dust_corr, zpt_dust_corr_err = MW_dust(SGA_0pt['RA'], SGA_0pt['DEC'], ebv_map)
+
+# Flip NaN values to 0
+SGA_dust_corr_err[np.isnan(SGA_dust_corr_err)] = 0
+zpt_dust_corr_err[np.isnan(zpt_dust_corr_err)] = 0
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# K-corrections
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+SGA_kcorr = k_corr(SGA_TF['Z_DESI'], 
+                   [SGA_TF['G_MAG_SB26'], SGA_TF['R_MAG_SB26'], SGA_TF['Z_MAG_SB26']], 
+                   [SGA_TF['G_MAG_SB26_ERR'], SGA_TF['R_MAG_SB26_ERR'], SGA_TF['Z_MAG_SB26_ERR']])
+zpt_kcorr = k_corr(SGA_0pt['Z_DESI'], 
+                   [SGA_0pt['G_MAG_SB26'], SGA_0pt['R_MAG_SB26'], SGA_0pt['Z_MAG_SB26']], 
+                   [SGA_0pt['G_MAG_SB26_ERR'], SGA_0pt['R_MAG_SB26_ERR'], SGA_0pt['Z_MAG_SB26_ERR']])
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Internal dust extinction
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+temp_infile = open('fuji_internalDust_mcmc-20241115.pickle', 'rb')
+dust_mcmc_samples,_ = pickle.load(temp_infile)
+temp_infile.close()
+
+internalDust_coeffs = np.median(dust_mcmc_samples, axis=1)
+internalDust_coeffs_err = np.zeros(len(internalDust_coeffs))
+internalDust_coeffs_err[0] = np.std(dust_mcmc_samples[0][(-1.5 < dust_mcmc_samples[0]) & (dust_mcmc_samples[0] < 0)])
+internalDust_coeffs_err[1] = np.std(dust_mcmc_samples[1][(0 < dust_mcmc_samples[1]) & (dust_mcmc_samples[1] < 1)])
+
+SGA_internalDust_corr, SGA_internalDust_corr_err = internal_dust(SGA_TF['BA'], 
+                                                                 internalDust_coeffs, 
+                                                                 internalDust_coeffs_err)
+zpt_internalDust_corr, zpt_internalDust_corr_err = internal_dust(SGA_0pt['BA'], 
+                                                                 internalDust_coeffs, 
+                                                                 internalDust_coeffs_err)
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Apply corrections
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+SGA_TF['R_MAG_SB26_CORR'] = SGA_TF['R_MAG_SB26'] - SGA_dust_corr[1] + SGA_sys_corr + SGA_kcorr[:,1] - SGA_internalDust_corr
+SGA_0pt['R_MAG_SB26_CORR'] = SGA_0pt['R_MAG_SB26'] - zpt_dust_corr[1] + zpt_sys_corr + zpt_kcorr[:,1] - zpt_internalDust_corr
+
+SGA_TF['R_MAG_SB26_ERR_CORR'] = np.sqrt(SGA_TF['R_MAG_SB26_ERR']**2 + SGA_dust_corr_err[1]**2 + SGA_sys_corr_err**2 + SGA_internalDust_corr_err**2)
+SGA_0pt['R_MAG_SB26_ERR_CORR'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR']**2 + zpt_dust_corr_err[1]**2 + zpt_sys_corr_err**2 + zpt_internalDust_corr_err**2)
 ################################################################################
 
 
 
 
+################################################################################
+# Compute the absolute magnitudes for the 0-pt calibrators based on their 
+# distance moduli
+#-------------------------------------------------------------------------------
+SGA_0pt['R_ABSMAG_SB26'] = SGA_0pt['R_MAG_SB26_CORR'] - SGA_0pt['DM1_SN']
+SGA_0pt['R_ABSMAG_SB26_err'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR_CORR']**2 + SGA_0pt['e_DM1_SN']**2)
+################################################################################
+
+
+
+
+# THERE ARE NO DWARF GALAXIES IN THIS CALIBRATION
 ################################################################################
 # Identify the dwarf galaxies
 #-------------------------------------------------------------------------------
@@ -704,15 +782,15 @@ SGA_0pt['R_ABSMAG_SB26_err'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR']**2 + SGA_0pt['e
 logV_n17 = (-17 - b_fit[1])/m_fit + V0
 b_perp = -17 + w0_fit*(logV_n17 - V0)
 #-------------------------------------------------------------------------------
-
-
+'''
 #-------------------------------------------------------------------------------
 # Identify the dwarf galaxies
 #-------------------------------------------------------------------------------
-dwarfs = (SGA_TF['R_MAG_SB26'] - SGA_TF['R_MAG_SB26_ERR']) > (-w0_fit*(np.log10(SGA_TF['V_0p33R26']) - V0) + b_perp + b_fit[0] - b_fit[1])
+dwarfs = (SGA_TF['R_MAG_SB26_CORR'] - SGA_TF['R_MAG_SB26_ERR_CORR']) > (-w0_fit*(np.log10(SGA_TF['V_0p33R26']) - V0) + b_perp + b_fit[0] - b_fit[1])
 
 SGA_TF_bright = SGA_TF[~dwarfs]
 #-------------------------------------------------------------------------------
+'''
 ################################################################################
 
 
@@ -744,9 +822,14 @@ y_chain2_quantiles = np.quantile(y_chain2, [0.1587, 0.8414], axis=1)
 #-------------------------------------------------------------------------------
 # Pack info into data
 #-------------------------------------------------------------------------------
-data1 = [np.log10(SGA_TF_bright['V_0p33R26']), SGA_TF_bright['R_MAG_SB26']]
+'''
+data1 = [np.log10(SGA_TF_bright['V_0p33R26']), SGA_TF_bright['R_MAG_SB26_CORR']]
 x1_err = 0.434*SGA_TF_bright['V_0p33R26_err']/SGA_TF_bright['V_0p33R26']
-y1_err = SGA_TF_bright['R_MAG_SB26_ERR']
+y1_err = SGA_TF_bright['R_MAG_SB26_ERR_CORR']
+'''
+data1 = [np.log10(SGA_TF['V_0p33R26']), SGA_TF['R_MAG_SB26_CORR']]
+x1_err = 0.434*SGA_TF['V_0p33R26_err']/SGA_TF['V_0p33R26']
+y1_err = SGA_TF['R_MAG_SB26_ERR_CORR']
 corr1_xy = np.zeros_like(x1_err)
 
 data2 = [np.log10(SGA_0pt['V_0p33R26']), SGA_0pt['R_ABSMAG_SB26']]
@@ -755,7 +838,7 @@ y2_err = SGA_0pt['R_ABSMAG_SB26_err']
 corr2_xy = np.zeros_like(x2_err)
 #-------------------------------------------------------------------------------
 
-
+'''
 #-------------------------------------------------------------------------------
 # Dwarf galaxies
 #-------------------------------------------------------------------------------
@@ -765,7 +848,7 @@ x_err_dwarfs = 0.434*SGA_TF['V_0p33R26_err'][dwarfs]/SGA_TF['V_0p33R26'][dwarfs]
 y_err_dwarfs = SGA_TF['R_MAG_SB26_ERR'][dwarfs]
 corr_xy_dwarfs = np.zeros_like(x_err_dwarfs)
 #-------------------------------------------------------------------------------
-
+'''
 
 #-------------------------------------------------------------------------------
 # Generate ellipses
@@ -789,7 +872,7 @@ ells2 = [
     )
     for i in range(len(data2[0]))
 ]
-
+'''
 ells_dwarfs = [
     Ellipse(
         xy=[data_dwarfs[0][i], data_dwarfs[1][i]],
@@ -799,6 +882,7 @@ ells_dwarfs = [
     )
     for i in range(len(data_dwarfs[0]))
 ]
+'''
 #-------------------------------------------------------------------------------
 
 
@@ -818,29 +902,29 @@ ax2.fill_between(xvals,
                  y_chain1_quantiles[0], 
                  y_chain1_quantiles[1], 
                  color="lightgray")
-'''
+
 # Dwarf region
 ax2.fill_between(xvals, 
                  yvals_perp, 
                  18, 
                  color='gainsboro')
-'''
+
 # Uncertainty ellipses for Coma galaxies
 for i, e in enumerate(ells1):
     ax2.add_artist(e)
     e.set_color(adjust_lightness('tab:blue', amount=1.75))
-
+'''
 # Uncertainty ellipses for dwarf Coma galaxies
 for i, e in enumerate(ells_dwarfs):
     ax2.add_artist(e)
     e.set_color(adjust_lightness('gray', amount=1.75))
-
+'''
 # Coma galaxies
 ax2.plot(data1[0], data1[1], 'x', label='Coma ({} galaxies)'.format(len(data1[0])))
-
+'''
 # Dwarf galaxies in Coma
 ax2.plot(data_dwarfs[0], data_dwarfs[1], 'x', c='gray')
-
+'''
 # Calibrated TFR w/ Coma intercept
 ax2.plot(xvals, yvals[0], "k", lw=1.3)
 ax2.plot(xvals, yvals[0] - sig_fit[0], "k--", lw=1.3)
@@ -855,7 +939,7 @@ ax2.set_ylabel(r"$m_r(26)$", fontsize=14)
 ax2.legend(loc='upper left')
 
 ax2.set_xlim(0.5, 3)
-ax2.set_ylim(18, 13)
+ax2.set_ylim(17.5, 12)
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # 0-pt calibrators
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -877,7 +961,7 @@ ax1.set_ylabel(r'$M_r (26) - 5\log h$', fontsize=14)
 
 ax1.legend(loc='upper left')
 
-ax1.set_ylim(-19, -22)
+ax1.set_ylim(-19.5, -23)
 ax1.set_aspect('equal', adjustable='box', share=True)
 #-------------------------------------------------------------------------------
 
@@ -885,7 +969,7 @@ ax1.set_aspect('equal', adjustable='box', share=True)
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20240625.png', 
+plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20241115.png', 
             dpi=150, 
             facecolor='none')
 #-------------------------------------------------------------------------------

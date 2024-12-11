@@ -21,7 +21,7 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data file name
-data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec.fits'
+data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec-Watkins15.fits'
 
 # Output LaTeX file name
 latex_filename = 'SV/fuji_TF_pv_short.tex'
@@ -43,10 +43,10 @@ err_dict = {'Z_DESI':'ZERR_DESI',
             'V_PEC':'VERR_PEC'}
 
 # Column header for table
-colhead = '\\tablehead{\\colhead{SGA ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\multicolumn{2}{c}{Redshift} & \\colhead{$D(26)$ [arcmin]} & \\multicolumn{2}{c}{$m_r(26)$} & \\multicolumn{2}{c}{$V(0.33R_{26})$ [km/s]} & \\multicolumn{2}{c}{$\mu$} & \\multicolumn{2}{c}{$V_\\text{pec}$ [km/s]}}'
+colhead = '\\tablehead{\\colhead{SGA ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.33R_{26})$} & \\colhead{$\mu$} & \\colhead{$V_{\\rm pec}$} \\\[-0.5em] & & & & [arcmin] & & [\\text{km/s}] & & [\\text{km/s}]}'
 
 # Table foot (caption, footnotes)
-tabfoot = '\\tablecomments{{Five} of the \\Nbright galaxies in DESI EDR with peculiar velocities measured using the calibrated TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$ band are from the SGA.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are calculated from the calibrated TFR, and peculiar velocities are based on the difference between the observed redshift and that inferred from the distance moduli.  Table~\\ref{tab:pv} is published in its entirety online in a machine-readable format.  A portion is shown here for guidance regarding its form and content.}'
+tabfoot = '\\tablecomments{{Five} of the \\Nbright galaxies in DESI EDR with peculiar velocities measured using the calibrated TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$-band are from the SGA.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are calculated from the calibrated TFR, and peculiar velocities are based on the difference between the observed redshift and that inferred from the distance moduli following \\cite{Watkins2015}.  Table~\\ref{tab:pv} is published in its entirety online in a machine-readable format.  A portion is shown here for guidance regarding its form and content.}'
 
 # Table name
 tab_name = 'DESI EDR Peculiar Velocities from the TFR'
