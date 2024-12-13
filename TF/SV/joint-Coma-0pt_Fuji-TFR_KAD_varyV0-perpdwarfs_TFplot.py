@@ -890,24 +890,32 @@ ells_dwarfs = [
 # Make the plot
 #-------------------------------------------------------------------------------
 fig, (ax1, ax2) = plt.subplots(2, 
-                               figsize=(4,8), 
+                               figsize=(4,4.8), 
                                tight_layout=True, 
                                sharex=True, 
                                height_ratios=[3, 5])
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Coma
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Calibrated TFR uncertainty
-ax2.fill_between(xvals, 
-                 y_chain1_quantiles[0], 
-                 y_chain1_quantiles[1], 
-                 color="lightgray")
-
 # Dwarf region
 ax2.fill_between(xvals, 
                  yvals_perp, 
                  18, 
                  color='gainsboro')
+
+# Perpendicular line (used to define dwarfs)
+# plt.plot(xvals, yvals_perp, ':', c='darkgray', lw=1.3)
+
+# Calibrated TFR uncertainty
+ax2.fill_between(xvals, 
+                 y_chain1_quantiles[0], 
+                 y_chain1_quantiles[1], 
+                 color="darkgray")
+
+# Calibrated TFR w/ Coma intercept
+ax2.plot(xvals, yvals[0], "k", lw=1.3)
+ax2.plot(xvals, yvals[0] - sig_fit[0], "k--", lw=1.3)
+ax2.plot(xvals, yvals[0] + sig_fit[0], "k--", lw=1.3)
 
 # Uncertainty ellipses for Coma galaxies
 for i, e in enumerate(ells1):
@@ -925,16 +933,9 @@ ax2.plot(data1[0], data1[1], 'x', label='Coma ({} galaxies)'.format(len(data1[0]
 # Dwarf galaxies in Coma
 ax2.plot(data_dwarfs[0], data_dwarfs[1], 'x', c='gray')
 '''
-# Calibrated TFR w/ Coma intercept
-ax2.plot(xvals, yvals[0], "k", lw=1.3)
-ax2.plot(xvals, yvals[0] - sig_fit[0], "k--", lw=1.3)
-ax2.plot(xvals, yvals[0] + sig_fit[0], "k--", lw=1.3)
 
-# Perpendicular line (used to define dwarfs)
-# plt.plot(xvals, yvals_perp, ':', c='darkgray', lw=1.3)
-
-ax2.set_xlabel(r"$\log{(V_\mathrm{0.33R_{26}} [\mathrm{km/s}])}$", fontsize=14)
-ax2.set_ylabel(r"$m_r(26)$", fontsize=14)
+ax2.set_xlabel(r"$\log{(V(0.33R_{26}) [\mathrm{km/s}])}$", fontsize=14)
+ax2.set_ylabel(r"$m_r^{0.05}(26)$", fontsize=14)
 
 ax2.legend(loc='upper left')
 
@@ -943,10 +944,14 @@ ax2.set_ylim(17.5, 12)
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # 0-pt calibrators
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Calibrated TFR uncertainty
 ax1.fill_between(xvals, 
                  y_chain2_quantiles[0], 
                  y_chain2_quantiles[1], 
-                 color='lightgray')
+                 color='darkgray')
+
+# Calibrated TFR
+ax1.plot(xvals, yvals[1], 'k', lw=1.3)
 
 for i, e in enumerate(ells2):
     ax1.add_artist(e)
@@ -955,21 +960,19 @@ for i, e in enumerate(ells2):
 ax1.plot(data2[0], data2[1], 'x', c='tab:orange', 
          label='0-pt ({} galaxies)'.format(len(data2[0])))
 
-ax1.plot(xvals, yvals[1], 'k', lw=1.3)
-
-ax1.set_ylabel(r'$M_r (26) - 5\log h$', fontsize=14)
+ax1.set_ylabel(r'$M_r^{0.05} (26) - 5\log h$', fontsize=14)
 
 ax1.legend(loc='upper left')
 
 ax1.set_ylim(-19.5, -23)
-ax1.set_aspect('equal', adjustable='box', share=True)
+# ax1.set_aspect('equal', adjustable='box', share=True)
 #-------------------------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20241115.png', 
+plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20241213.png', 
             dpi=150, 
             facecolor='none')
 #-------------------------------------------------------------------------------
