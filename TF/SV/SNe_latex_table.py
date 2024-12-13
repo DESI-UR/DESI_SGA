@@ -1,6 +1,6 @@
 '''
 Create LaTeX data table of the SNe galaxies with the data formatted for the 
-table.
+paper.
 '''
 
 
@@ -42,10 +42,10 @@ err_dict = {'Z_DESI':'ZERR_DESI',
             'DM1_SN':'e_DM1_SN'}
 
 # Column header for table
-colhead = '\\tablehead{\\colhead{SGA ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\multicolumn{2}{c}{Redshift} & \\colhead{$D(26)$ [arcmin]} & \\multicolumn{2}{c}{$m_r(26)$} & \\multicolumn{2}{c}{$V(0.33R_{26})$ [km/s]} & \\multicolumn{2}{c}{$\\mu$} & \\colhead{SNIa}}'
+colhead = '\\tablehead{\\colhead{SGA-2020 ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.33R_{26})$} & \\colhead{$\mu$} & \\colhead{SN} \\\[-0.5em] & [\text{deg}] & [\text{deg}] &  & \\colhead{[arcmin]} & [\\text{AB mag}] & \\colhead{[\\text{km/s}]} & [\\text{mag}] & }'
 
 # Table foot (caption, footnotes)
-tabfoot = '\\tablecomments{{List} of the 2 galaxies used for calibrating the zero-point of the TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$ band are from the SGA.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are from \\cite{Stahl2021}.}'
+tabfoot = '\\tablecomments{{List} of the two galaxies used for calibrating the zero-point of the TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$-band are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are from \\cite{Stahl2021}.}'
 
 # Table name
 tab_name = 'Galaxies used for TFR zero-point calibration'
@@ -129,12 +129,14 @@ def latex_3err(error):
     return '$\\pm${0}'.format(err)
 
 def latex_zerr(error):
-    err = '{:.2f}'.format(1e6*error)
-    return '$\\pm$({0}'.format(err) + '$\\times 10^{-6})$'
+    # err = '{:.2f}'.format(1e6*error)
+    # return '$\\pm$({0}'.format(err) + '$\\times 10^{-6})$'
+    err = '{:.0f}'.format(1e6*error)
+    return '({0})'.format(err)
 
 format_dict = {'SGA_ID':'%7d',
-               'RA':latex_ra, 
-               'DEC':latex_dec,
+               'RA':'{:.8f}', #latex_ra, 
+               'DEC':'{:.8f}', #latex_dec,
                'Z_DESI':'{:.6f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
