@@ -21,7 +21,7 @@ import astropy.units as u
 # Constants
 #-------------------------------------------------------------------------------
 # h = 1 # EDR
-h = 0.7574 # DR1
+h = 0.7762 # DR1
 H0 = 100*h*u.km/u.s/u.Mpc
 
 c = const.c.to('km/s')
@@ -42,7 +42,7 @@ data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_moduli.fits'
+filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
@@ -55,6 +55,13 @@ if data_directory == 'SV/':
     mu_colname = 'mu_TFbright'
 elif data_directory == 'Y1/':
     mu_colname = 'mu_TF'
+################################################################################
+
+
+
+################################################################################
+# Compute peculiar velocities per Carreres23 estimator
+#-------------------------------------------------------------------------------
 ################################################################################
 
 
