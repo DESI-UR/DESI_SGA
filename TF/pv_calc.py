@@ -24,6 +24,8 @@ import astropy.units as u
 h = 0.7762 # DR1
 H0 = 100*h*u.km/u.s/u.Mpc
 
+Om = 0.3151 # DESI fiducial cosmology
+
 c = const.c.to('km/s')
 
 # Number of random samples to generate for uncertainties
@@ -89,8 +91,6 @@ def vpec(z_mod, mu, c=3e5, H0=100):
     '''
     return (c*z_mod/(1 + z_mod))*(np.log(c*z_mod/(1e-5 * H0)) - 0.2*mu*np.log(10))
 
-
-Om = 0.3151 # DESI fiducial cosmology
 
 z_mod = zmod(galaxies['Z_DESI'], Om, 1 - Om) # Assuming flat LCDM
 
