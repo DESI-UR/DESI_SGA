@@ -39,12 +39,13 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-# data_directory = 'SV/'
-data_directory = 'Y1/'
+data_directory = 'SV/'
+# data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
+filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
@@ -92,7 +93,8 @@ def vpec(z_mod, mu, c=3e5, H0=100):
     return (c*z_mod/(1 + z_mod))*(np.log(c*z_mod/(1e-5 * H0)) - 0.2*mu*np.log(10))
 
 
-z_mod = zmod(galaxies['Z_DESI'], Om, 1 - Om) # Assuming flat LCDM
+# z_mod = zmod(galaxies['Z_DESI'], Om, 1 - Om) # Assuming flat LCDM
+z_mod = zmod(galaxies['Z_DESI_CMB'], Om, 1 - Om) # Assuming flat LCDM
 
 galaxies['V_PEC'] = vpec(z_mod, galaxies[mu_colname], c.value, H0.value)
 # v_pec = vpec(z_mod, galaxies[mu_colname], c.value, H0.value)
@@ -104,7 +106,8 @@ galaxies['VERR_PEC'] = np.nan
 
 for i in range(len(galaxies)):
     
-    z_desi_random = rng.normal(galaxies['Z_DESI'][i], 
+    # z_desi_random = rng.normal(galaxies['Z_DESI'][i], 
+    z_desi_random = rng.normal(galaxies['Z_DESI_CMB'][i], 
                                galaxies['ZERR_DESI'][i], 
                                size=N_samples)
     mu_random = rng.normal(galaxies[mu_colname][i], 
