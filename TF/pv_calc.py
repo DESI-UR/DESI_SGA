@@ -20,10 +20,6 @@ import astropy.units as u
 ################################################################################
 # Constants
 #-------------------------------------------------------------------------------
-# h = 1 # EDR
-h = 0.7762 # DR1
-H0 = 100*h*u.km/u.s/u.Mpc
-
 Om = 0.3151 # DESI fiducial cosmology
 
 c = const.c.to('km/s')
@@ -39,13 +35,14 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-data_directory = 'SV/'
-# data_directory = 'Y1/'
+# data_directory = 'SV/'
+data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
+filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_zCMB0p1_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
@@ -53,6 +50,11 @@ galaxies = Table(hdul[1].data)
 # sig_TFR = hdul[0].header['SIG']
 hdr = hdul[0].header
 hdul.close()
+
+if 'H0' in hdr.keys():
+    H0 = hdr['H0']*u.km/u.s/u.Mpc
+else:
+    H0 = 100*u.km/u.s/u.Mpc
 
 if data_directory == 'SV/':
     mu_colname = 'mu_TFbright'
