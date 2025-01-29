@@ -1,10 +1,10 @@
 *.png
 *.jpg
 *.pickle
-*.txt
 *.fits
 *.dat
 *.csv
 *.tex
 .ipynb_checkpoints/
 __pycache__/
+.DS_Store
