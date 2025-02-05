@@ -20,6 +20,7 @@ from astropy.io import fits
 from astropy.table import Table, join
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import astropy.constants as const
 # from astropy.visualization.wcsaxes import SphericalCircle
 
 import corner
@@ -47,7 +48,7 @@ from TF_photoCorrect import BASS_corr, MW_dust, k_corr, internal_dust
 h = 1
 H0 = 100*h
 
-c = 3e5
+c = const.c.to('km/s')
 
 q0 = 0.2
 ################################################################################
@@ -218,9 +219,9 @@ SGA_coords = SkyCoord(SGA['RA'], SGA['DEC'], unit='deg')
 
 sep = Coma_coords.separation(SGA_coords)
 
-SGA_in_Coma1 = (sep < R2t_Coma_angle_1p5) & (SGA['Z_DESI']*c > V_Coma - 3*sigma_Coma) & (SGA['Z_DESI']*c < V_Coma + 3*sigma_Coma)
+SGA_in_Coma1 = (sep < R2t_Coma_angle_1p5) & (SGA['Z_DESI']*c.value > V_Coma - 3*sigma_Coma) & (SGA['Z_DESI']*c.value < V_Coma + 3*sigma_Coma)
 
-SGA_in_Coma2 = (sep >= R2t_Coma_angle_1p5) & (sep < R2t_Coma_angle_3) & (SGA['Z_DESI']*c > V_Coma - 2*sigma_Coma) & (SGA['Z_DESI']*c < V_Coma + 2*sigma_Coma)
+SGA_in_Coma2 = (sep >= R2t_Coma_angle_1p5) & (sep < R2t_Coma_angle_3) & (SGA['Z_DESI']*c.value > V_Coma - 2*sigma_Coma) & (SGA['Z_DESI']*c.value < V_Coma + 2*sigma_Coma)
 
 SGA_in_Coma = SGA_in_Coma1 | SGA_in_Coma2
 #-------------------------------------------------------------------------------
@@ -307,8 +308,9 @@ for sga_gal in np.unique(centers_inComa['SGA_ID']):
     z_err_center2 = SGA['ZERR_DESI'][sga_idx]**2
 
     # Calculate rotational velocity for all observations of the galaxy
-    axis_inComa['V_ROT'][obs_idx] = c*(axis_inComa['Z'][obs_idx] - z_center)
-    axis_inComa['V_ROT_ERR'][obs_idx] = c*np.sqrt(axis_inComa['ZERR'][obs_idx]**2 + z_err_center2)
+    z_rot = (1 + axis_inComa['Z'][obs_idx])/(1 + z_center) - 1
+    axis_inComa['V_ROT'][obs_idx] = c*z_rot
+    axis_inComa['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_inComa['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_inComa['Z'][obs_idx])/(1 + z_center)**2))
     #---------------------------------------------------------------------------
     
     
@@ -734,7 +736,7 @@ zpt_kcorr = k_corr(SGA_0pt['Z_DESI'],
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Internal dust extinction
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-temp_infile = open('fuji_internalDust_mcmc-20241115.pickle', 'rb')
+temp_infile = open('fuji_internalDust_mcmc-20250205.pickle', 'rb')
 dust_mcmc_samples,_ = pickle.load(temp_infile)
 temp_infile.close()
 
@@ -972,7 +974,7 @@ ax1.set_ylim(-19.5, -23)
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20241213.png', 
+plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20250205.png', 
             dpi=150, 
             facecolor='none')
 #-------------------------------------------------------------------------------
