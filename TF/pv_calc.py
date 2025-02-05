@@ -59,7 +59,7 @@ else:
 if data_directory == 'SV/':
     mu_colname = 'mu_TFbright'
 elif data_directory == 'Y1/':
-    mu_colname = 'mu_TF'
+    mu_colname = 'MU_TF'
 ################################################################################
 
 
@@ -113,7 +113,7 @@ for i in range(len(galaxies)):
                                galaxies['ZERR_DESI'][i], 
                                size=N_samples)
     mu_random = rng.normal(galaxies[mu_colname][i], 
-                           galaxies[mu_colname + '_err'][i], 
+                           galaxies[mu_colname + '_ERR'][i], 
                            size=N_samples)
     
     zmod_random = zmod(z_desi_random[z_desi_random > 0], Om, 1-Om)
