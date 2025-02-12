@@ -35,14 +35,14 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-# data_directory = 'SV/'
-data_directory = 'Y1/'
+data_directory = 'SV/'
+# data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
-filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_zCMB0p1_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_zCMB0p1_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
@@ -57,9 +57,9 @@ else:
     H0 = 100*u.km/u.s/u.Mpc
 
 if data_directory == 'SV/':
-    mu_colname = 'mu_TFbright'
+    mu_colname = 'MU_TFbright'
 elif data_directory == 'Y1/':
-    mu_colname = 'mu_TF'
+    mu_colname = 'MU_TF'
 ################################################################################
 
 
@@ -113,7 +113,7 @@ for i in range(len(galaxies)):
                                galaxies['ZERR_DESI'][i], 
                                size=N_samples)
     mu_random = rng.normal(galaxies[mu_colname][i], 
-                           galaxies[mu_colname + '_err'][i], 
+                           galaxies[mu_colname + '_ERR'][i], 
                            size=N_samples)
     
     zmod_random = zmod(z_desi_random[z_desi_random > 0], Om, 1-Om)

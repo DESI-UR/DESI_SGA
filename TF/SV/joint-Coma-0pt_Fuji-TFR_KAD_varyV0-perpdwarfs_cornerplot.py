@@ -57,7 +57,7 @@ for ax in fig.get_axes():
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_20241122.png', 
+plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_20250205.png', 
             dpi=150, 
             facecolor='none', 
             bbox_inches='tight')
