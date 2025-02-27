@@ -181,7 +181,7 @@ def hyperfit_line(x, y, dx, dy, bounds):
 ################################################################################
 # Fitting using the subclassed version of hyperfit (for multiple data sets)
 #-------------------------------------------------------------------------------
-def hyperfit_line_multi(x, y, dx, dy, bounds, scatter=None):
+def hyperfit_line_multi(x, y, dx, dy, bounds, weights=None, scatter=None):
     '''
     Fit a line, y = ax + b, to the data, using a hacked version of the hyperfit 
     package.  This accepts uncertainties in both x and y.
@@ -207,6 +207,11 @@ def hyperfit_line_multi(x, y, dx, dy, bounds, scatter=None):
           1. (slope minimum, slope maximum)
           2. (y-intercept minimum, y-intercept maximum) x M
           3. (scatter minimum, scatter maximum) x M
+
+    weights : None or list with length M of ndarrays of shape (N,)
+        weight for each galaxy in each set.  If None, weights will be set to 1.
+
+        Note that len(weights[i]) == len(x[i])
           
     scatter : None or something else
         Determines whether there is just one scatter parameter used for all data 
@@ -269,7 +274,10 @@ def hyperfit_line_multi(x, y, dx, dy, bounds, scatter=None):
     ############################################################################
     # Create the hyperfit object
     #---------------------------------------------------------------------------
-    hf = MultiLinFit(datasets, covs, scatter=scatter)
+    if weights is None:
+        hf = MultiLinFit(datasets, covs, scatter=scatter)
+    else:
+        hf = MultiLinFit(datasets, covs, weights=weights, scatter=scatter)
     ############################################################################
 
 
