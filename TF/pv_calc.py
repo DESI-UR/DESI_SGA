@@ -43,7 +43,8 @@ data_directory = 'Y1/'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_zCMB0p1_moduli.fits'
-filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax_moduli.fits'
+filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax-1_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
