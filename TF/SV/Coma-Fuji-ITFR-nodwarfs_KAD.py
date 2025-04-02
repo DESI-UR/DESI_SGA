@@ -183,44 +183,32 @@ Coma_row_t3 = table3['Nest'] == Coma_nest
 
 R2t_Coma = table3['R2t'][Coma_row_t3][0]
 sigma_Coma = table3['sigP'][Coma_row_t3][0]
-
-
-#-------------------------------------------------------------------------------
-# Data table #2 from Tully et al. (2013)
-#-------------------------------------------------------------------------------
-hdu = fits.open('../Tully13-Table2.fit')
-table2 = Table(hdu[1].data)
-hdu.close()
-#-------------------------------------------------------------------------------
+mu_Coma = table3['DM'][Coma_row_t3][0]
 
 
 Coma_coords = SkyCoord(table3['SGLON'][Coma_row_t3]*u.degree, 
                        table3['SGLAT'][Coma_row_t3]*u.degree, 
                        frame='supergalactic')
 
-group_coords = SkyCoord(table2['SGLON']*u.degree, 
-                        table2['SGLAT']*u.degree, 
-                        frame='supergalactic')
-
-idx, d2d, d3d = Coma_coords.match_to_catalog_sky(group_coords)
-
-V_Coma = table2['__HV_'][idx][0]
+d_Coma = 10*10**(0.2*mu_Coma) # pc
+V_Coma = 100*(d_Coma*1e-6)    # km/s
 
 
 #-------------------------------------------------------------------------------
 # Calculate the projected distance between the Coma cluster and each SGA galaxy
 #-------------------------------------------------------------------------------
-# First, we need to convert R2t from Mpc to an angle, using the group's 
-# heliocentric velocity
-R2t_Coma_angle = (R2t_Coma/(V_Coma/H0))*u.radian
+# First, we need to convert R2t from Mpc to an angle, using the group's velocity
+# Note that we are NOT assuming that the size of the cluster is a small angle!!
+R2t_Coma_angle_1p5 = np.arctan(1.5*R2t_Coma/(d_Coma*1e-6))*u.radian
+R2t_Coma_angle_3 = np.arctan(3*R2t_Coma/(d_Coma*1e-6))*u.radian
 
 SGA_coords = SkyCoord(SGA['RA'], SGA['DEC'], unit='deg')
 
 sep = Coma_coords.separation(SGA_coords)
 
-SGA_in_Coma1 = (sep < 1.5*R2t_Coma_angle) & (SGA['Z_DESI']*c > V_Coma - 3*sigma_Coma) & (SGA['Z_DESI']*c < V_Coma + 3*sigma_Coma)
+SGA_in_Coma1 = (sep < R2t_Coma_angle_1p5) & (SGA['Z_DESI']*c > V_Coma - 3*sigma_Coma) & (SGA['Z_DESI']*c < V_Coma + 3*sigma_Coma)
 
-SGA_in_Coma2 = (sep >= 1.5*R2t_Coma_angle) & (sep < 3*R2t_Coma_angle) & (SGA['Z_DESI']*c > V_Coma - 2*sigma_Coma) & (SGA['Z_DESI']*c < V_Coma + 2*sigma_Coma)
+SGA_in_Coma2 = (sep >= R2t_Coma_angle_1p5) & (sep < R2t_Coma_angle_3) & (SGA['Z_DESI']*c > V_Coma - 2*sigma_Coma) & (SGA['Z_DESI']*c < V_Coma + 2*sigma_Coma)
 
 SGA_in_Coma = SGA_in_Coma1 | SGA_in_Coma2
 #-------------------------------------------------------------------------------

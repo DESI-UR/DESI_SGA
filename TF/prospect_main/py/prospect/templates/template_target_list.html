@@ -1,0 +1,22 @@
+<HTML>
+
+<HEAD>
+	<TITLE>DESI spectra for {{ target }} targets </TITLE>
+</HEAD>
+
+<BODY>
+	<h2> DESI spectra for {{ target }} targets in Healpix {{ pixel }} </h2>
+    <h3> {{ info }} </h3>
+    <p> All spectra from a given target are coadded.
+<br> {{ pixel }} has {{ nspec }} available spectra for this selection.
+<br> Divided into subsets sorted by target ID.
+<br><a href="../../index.html">Back to main index</a>
+
+<ul>
+{% for subset in subsets %}
+<li><a href="{{ basename }}_{{ subset }}.html"> View subset {{ subset }}</a></li>
+{% endfor %}
+</ul>
+
+</BODY>
+</HTML>
