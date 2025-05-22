@@ -21,7 +21,8 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data file name
-data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec-Watkins15.fits'
+# data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec-Watkins15.fits'
+data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli_pec-Watkins15.fits'
 
 # Output LaTeX file name
 latex_filename = 'SV/fuji_TF_pv_short.tex'
@@ -34,12 +35,12 @@ col_names = ['SGA_ID',
              'D26', 
              'R_MAG_SB26', 
              'V_0p33R26', 
-             'mu_TFbright', 
+             'MU_TFbright', 
              'V_PEC']
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
-            'V_0p33R26':'V_0p33R26_err', 
-            'mu_TFbright':'mu_TFbright_err', 
+            'V_0p33R26':'V_0p33R26_ERR', 
+            'MU_TFbright':'MU_TFbright_ERR', 
             'V_PEC':'VERR_PEC'}
 
 # Column header for table
@@ -125,9 +126,9 @@ format_dict = {'SGA_ID':'%7d',
                'R_MAG_SB26':'{:.2f}', 
                'R_MAG_SB26_ERR':latex_3err,
                'V_0p33R26':'{:.2f}',
-               'V_0p33R26_err':latex_2err, 
-               'mu_TFbright':'{:.2f}', 
-               'mu_TFbright_err':latex_2err, 
+               'V_0p33R26_ERR':latex_2err, 
+               'MU_TFbright':'{:.2f}', 
+               'MU_TFbright_ERR':latex_2err, 
                'V_PEC':'{:.0f}', 
                'VERR_PEC':latex_verr}
 #-------------------------------------------------------------------------------

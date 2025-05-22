@@ -37,6 +37,7 @@ sys.path.insert(1, '/global/u1/k/kadglass/DESI_SGA/TF/')
 from help_functions import adjust_lightness
 # from line_fits import param_invert, hyperfit_line
 from TF_photoCorrect import BASS_corr, MW_dust, k_corr, internal_dust
+from z_CMB_convert import convert_z_frame
 ################################################################################
 
 
@@ -81,7 +82,8 @@ for i in range(len(SGA)):
 #-------------------------------------------------------------------------------
 # Best-fit
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_KAD.pickle', 'rb')
+temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_AnthonyUpdates_weightsVmax-1_KAD.pickle', 
+                   'rb')
 cov_ab, tfr_samples, V0 = pickle.load(temp_infile)
 temp_infile.close()
 
@@ -195,16 +197,20 @@ Coma_nest = 100001
 Coma_row_t3 = table3['Nest'] == Coma_nest
 
 R2t_Coma = table3['R2t'][Coma_row_t3][0]
-sigma_Coma = table3['sigP'][Coma_row_t3][0]
+sigma_Coma = table3['sigV'][Coma_row_t3][0]
 mu_Coma = table3['DM'][Coma_row_t3][0]
 
 
 Coma_coords = SkyCoord(table3['SGLON'][Coma_row_t3]*u.degree, 
                        table3['SGLAT'][Coma_row_t3]*u.degree, 
-                       frame='supergalactic')
+                       frame='supergalactic').icrs
 
-d_Coma = 10*10**(0.2*mu_Coma) # pc
-V_Coma = 100*(d_Coma*1e-6)    # km/s
+zHelio_Coma = convert_z_frame(table3['<Vcmba>'][Coma_row_t3][0]/c.value, 
+                              Coma_coords.ra.deg, 
+                              Coma_coords.dec.deg, 
+                              corrtype='-full')[0]
+
+V_Coma = 100 * 10**(0.2*(mu_Coma - 25)) / (1 + zHelio_Coma)
 
 
 #-------------------------------------------------------------------------------
@@ -212,8 +218,8 @@ V_Coma = 100*(d_Coma*1e-6)    # km/s
 #-------------------------------------------------------------------------------
 # First, we need to convert R2t from Mpc to an angle, using the group's velocity
 # Note that we are NOT assuming that the size of the cluster is a small angle!!
-R2t_Coma_angle_1p5 = np.arctan(1.5*R2t_Coma/(d_Coma*1e-6))*u.radian
-R2t_Coma_angle_3 = np.arctan(3*R2t_Coma/(d_Coma*1e-6))*u.radian
+R2t_Coma_angle_1p5 = np.arctan(1.5*R2t_Coma/(V_Coma/H0))*u.radian
+R2t_Coma_angle_3 = np.arctan(3*R2t_Coma/(V_Coma/H0))*u.radian
 
 SGA_coords = SkyCoord(SGA['RA'], SGA['DEC'], unit='deg')
 
@@ -974,7 +980,7 @@ ax1.set_ylim(-19.5, -23)
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_20250205.png', 
+plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_AnthonyUpdates_weightsVmax-1_20250522.png', 
             dpi=150, 
             facecolor='none')
 #-------------------------------------------------------------------------------
