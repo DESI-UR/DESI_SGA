@@ -21,10 +21,11 @@ import numpy as np
 #-------------------------------------------------------------------------------
 # Galaxy data file name
 # data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
-data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+# data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
 
 # Output LaTeX file name
-latex_filename = 'fuji_Coma_cal_galaxies_20250522.tex'
+latex_filename = 'fuji_Coma_cal_galaxies_20250523.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -72,7 +73,7 @@ for i in range(len(data_table)):
 ################################################################################
 # Galaxies to include
 #-------------------------------------------------------------------------------
-SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration-20250522.txt', 
+SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration-20250523.txt', 
                         format='ascii.commented_header')
 
 cal_boolean = np.zeros(len(data_table), dtype=bool)
@@ -117,6 +118,10 @@ def latex_dec(angle):
     d,m,s = Angle(angle, unit=u.deg).dms
     return sign + '\\dec{{{0}}}{{{1}}}{{{2}}}{{{3}}}'.format('{:02d}'.format(int(abs(d))), '{:02d}'.format(int(abs(m))), '{:02d}'.format(int(abs(s))), '{:.2f}'.format(abs(s) - int(abs(s)))[1:])
 
+def latex_1err(error):
+    err = '{:.1f}'.format(error)
+    return '$\\pm${0}'.format(err)
+
 def latex_2err(error):
     err = '{:.2f}'.format(error)
     return '$\\pm${0}'.format(err)
@@ -133,15 +138,15 @@ def latex_zerr(error):
 
 
 format_dict = {'SGA_ID':'%7d',
-               'RA':'{:.8f}', #latex_ra, 
-               'DEC':'{:.8f}', #latex_dec,
+               'RA':'{:.6f}', #latex_ra, 
+               'DEC':'{:.6f}', #latex_dec,
                'Z_DESI':'{:.6f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
                'R_MAG_SB26_ERR':latex_3err,
-               'V_0p33R26':'{:.2f}',
-               'V_0p33R26_ERR':latex_2err}
+               'V_0p33R26':'{:.1f}',
+               'V_0p33R26_ERR':latex_1err}
 #-------------------------------------------------------------------------------
 # Format table
 #-------------------------------------------------------------------------------

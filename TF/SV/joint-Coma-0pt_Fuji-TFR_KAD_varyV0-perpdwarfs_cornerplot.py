@@ -26,7 +26,7 @@ import pickle
 #-------------------------------------------------------------------------------
 # Best-fit
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_AnthonyUpdates_weightsVmax-1_KAD.pickle', 
+temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_AnthonyUpdates_weightsVmax-1_dVsys_KAD.pickle', 
                    'rb')
 cov_ab, tfr_samples, V0 = pickle.load(temp_infile)
 temp_infile.close()
@@ -58,7 +58,7 @@ for ax in fig.get_axes():
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_20250522.png', 
+plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_dVsys_20250523.png', 
             dpi=150, 
             facecolor='none', 
             bbox_inches='tight')

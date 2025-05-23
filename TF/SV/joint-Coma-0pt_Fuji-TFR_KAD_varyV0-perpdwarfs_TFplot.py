@@ -52,6 +52,9 @@ H0 = 100*h
 c = const.c.to('km/s')
 
 q0 = 0.2
+
+# Redrock systematic duplicate redshift uncertainty (from Lan+23)
+dv_sys = 7 # km/s
 ################################################################################
 
 
@@ -82,7 +85,7 @@ for i in range(len(SGA)):
 #-------------------------------------------------------------------------------
 # Best-fit
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_AnthonyUpdates_weightsVmax-1_KAD.pickle', 
+temp_infile = open('cov_ab_fuji_joint_TFR_varyV0-perpdwarfs0_AnthonyUpdates_weightsVmax-1_dVsys_KAD.pickle', 
                    'rb')
 cov_ab, tfr_samples, V0 = pickle.load(temp_infile)
 temp_infile.close()
@@ -316,7 +319,7 @@ for sga_gal in np.unique(centers_inComa['SGA_ID']):
     # Calculate rotational velocity for all observations of the galaxy
     z_rot = (1 + axis_inComa['Z'][obs_idx])/(1 + z_center) - 1
     axis_inComa['V_ROT'][obs_idx] = c*z_rot
-    axis_inComa['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_inComa['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_inComa['Z'][obs_idx])/(1 + z_center)**2))
+    axis_inComa['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_inComa['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_inComa['Z'][obs_idx])/(1 + z_center)**2) + (dv_sys/c).value**2)
     #---------------------------------------------------------------------------
     
     
@@ -980,7 +983,7 @@ ax1.set_ylim(-19.5, -23)
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_AnthonyUpdates_weightsVmax-1_20250522.png', 
+plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_AnthonyUpdates_weightsVmax-1_dVsys_20250523.png', 
             dpi=150, 
             facecolor='none')
 #-------------------------------------------------------------------------------

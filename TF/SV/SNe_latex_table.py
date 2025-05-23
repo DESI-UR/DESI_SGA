@@ -21,7 +21,7 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data file name
-data_filename = 'SGA_distances_0pt_fuji.fits'
+data_filename = 'SGA_distances_0pt_fuji_dVsys.fits'
 
 # Output LaTeX file name
 latex_filename = 'fuji_SNe_cal_galaxies.tex'
@@ -38,7 +38,7 @@ col_names = ['SGA_ID',
              'SN']
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
-            'V_0p33R26':'V_0p33R26_err', 
+            'V_0p33R26':'V_0p33R26_ERR', 
             'DM1_SN':'e_DM1_SN'}
 
 # Column header for table
@@ -120,6 +120,10 @@ def latex_dec(angle):
     d,m,s = Angle(angle, unit=u.deg).dms
     return sign + '\\dec{{{0}}}{{{1}}}{{{2}}}{{{3}}}'.format('{:02d}'.format(int(abs(d))), '{:02d}'.format(int(abs(m))), '{:02d}'.format(int(abs(s))), '{:.2f}'.format(abs(s) - int(abs(s)))[1:])
 
+def latex_1err(error):
+    err = '{:.1f}'.format(error)
+    return '$\\pm${0}'.format(err)
+    
 def latex_2err(error):
     err = '{:.2f}'.format(error)
     return '$\\pm${0}'.format(err)
@@ -135,15 +139,15 @@ def latex_zerr(error):
     return '({0})'.format(err)
 
 format_dict = {'SGA_ID':'%7d',
-               'RA':'{:.8f}', #latex_ra, 
-               'DEC':'{:.8f}', #latex_dec,
+               'RA':'{:.6f}', #latex_ra, 
+               'DEC':'{:.6f}', #latex_dec,
                'Z_DESI':'{:.6f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
                'R_MAG_SB26_ERR':latex_3err,
-               'V_0p33R26':'{:.2f}',
-               'V_0p33R26_err':latex_2err, 
+               'V_0p33R26':'{:.1f}',
+               'V_0p33R26_ERR':latex_1err, 
                'DM1_SN':'{:.2f}', 
                'e_DM1_SN':latex_2err, 
                'SN':'%s'}

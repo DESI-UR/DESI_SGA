@@ -22,7 +22,7 @@ import numpy as np
 #-------------------------------------------------------------------------------
 # Galaxy data file name
 # data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec-Watkins15.fits'
-data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli_pec-Watkins15.fits'
+data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli_pec-Watkins15.fits'
 
 # Output LaTeX file name
 latex_filename = 'SV/fuji_TF_pv_short.tex'
@@ -98,6 +98,10 @@ def latex_dec(angle):
     d,m,s = Angle(angle, unit=u.deg).dms
     return sign + '\\dec{{{0}}}{{{1}}}{{{2}}}{{{3}}}'.format('{:02d}'.format(int(abs(d))), '{:02d}'.format(int(abs(m))), '{:02d}'.format(int(abs(s))), '{:.2f}'.format(abs(s) - int(abs(s)))[1:])
 
+def latex_1err(error):
+    err = '{:.1f}'.format(error)
+    return '$\\pm${0}'.format(err)
+    
 def latex_2err(error):
     err = '{:.2f}'.format(error)
     return '$\\pm${0}'.format(err)
@@ -118,15 +122,15 @@ def latex_verr(error):
     
 
 format_dict = {'SGA_ID':'%7d',
-               'RA':'{:.8f}', #latex_ra, 
-               'DEC':'{:.8f}', #latex_dec, 
+               'RA':'{:.6f}', #latex_ra, 
+               'DEC':'{:.6f}', #latex_dec, 
                'Z_DESI':'{:.6f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
                'R_MAG_SB26_ERR':latex_3err,
-               'V_0p33R26':'{:.2f}',
-               'V_0p33R26_ERR':latex_2err, 
+               'V_0p33R26':'{:.1f}',
+               'V_0p33R26_ERR':latex_1err, 
                'MU_TFbright':'{:.2f}', 
                'MU_TFbright_ERR':latex_2err, 
                'V_PEC':'{:.0f}', 
