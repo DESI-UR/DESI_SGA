@@ -40,7 +40,6 @@ temp_infile.close()
 # Plot the corner plot
 #-------------------------------------------------------------------------------
 fig = corner.corner(tfr_samples.T, bins=30, smooth=1,
-                    #range=[[-8.2, -6.8], [15.5, 15.75], [-19.2, -18.25], [0.95, 1.2]],
                     labels=['$a$', '$b_{Coma}$', '$b_{0pt}$', r'$\sigma_{Coma}$'],
                     label_kwargs={'fontsize':18}, 
                     labelpad=0.1, 
@@ -58,7 +57,7 @@ for ax in fig.get_axes():
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_dVsys_20250523.png', 
+plt.savefig('../../Figures/SV/fuji_joint_Coma_corner_dVsys_20250620.png', 
             dpi=150, 
             facecolor='none', 
             bbox_inches='tight')

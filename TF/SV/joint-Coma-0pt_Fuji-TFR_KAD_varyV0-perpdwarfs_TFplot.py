@@ -17,7 +17,7 @@ from matplotlib.patches import Ellipse
 # import matplotlib as mpl
 
 from astropy.io import fits
-from astropy.table import Table, join
+from astropy.table import Table, join, unique
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 import astropy.constants as const
@@ -55,6 +55,11 @@ q0 = 0.2
 
 # Redrock systematic duplicate redshift uncertainty (from Lan+23)
 dv_sys = 7 # km/s
+dz_sys = dv_sys/c.value
+
+# For error propagation
+rng = np.random.default_rng()
+N_samples = 10000
 ################################################################################
 
 
@@ -65,7 +70,11 @@ dv_sys = 7 # km/s
 #-------------------------------------------------------------------------------
 # fuji
 #-------------------------------------------------------------------------------
-tfuji = Table.read('/global/cfs/projectdirs/desi/science/td/pv/tfgalaxies/desi_pv_tf_fuji_healpix.fits')
+tfuji_all = Table.read('/global/cfs/projectdirs/desi/science/td/pv/tfgalaxies/desi_pv_tf_fuji_healpix.fits')
+tfuji = unique(tfuji_all)
+
+# Update all Redrock uncertainties to account for 7 km/s statistical uncertainty
+tfuji['ZERR_MOD'] = np.sqrt(tfuji['ZERR']**2 + dz_sys**2)
 #-------------------------------------------------------------------------------
 
 
@@ -94,7 +103,7 @@ m_fit = np.median(tfr_samples[0])
 b_fit = np.median(tfr_samples[1:3], axis=1)
 sig_fit = np.median(tfr_samples[3:], axis=1)
 
-w0_fit = 1/m_fit
+# w0_fit = 1/m_fit
 #-------------------------------------------------------------------------------
 ################################################################################
 
@@ -164,12 +173,15 @@ good_centers = fuji_centers[(fuji_centers['DELTACHI2'] > 25) & (fuji_centers['ZW
 SGA['Z_DESI'] = np.nan
 SGA['ZERR_DESI'] = np.nan
 
-weights = 1./(good_centers['ZERR']**2)
+weights = 1./(good_centers['ZERR_MOD']**2)
 
 for sga_id in np.unique(good_centers['SGA_ID']):
     
     # Find all the center observations of this galaxy
     obs_idx = good_centers['SGA_ID'] == sga_id
+
+    # Number of center observations of this galaxy
+    N_obs = np.sum(obs_idx)
     
     # Find the row in SGA for this galaxy
     SGA_idx = SGA_dict[sga_id]
@@ -178,7 +190,22 @@ for sga_id in np.unique(good_centers['SGA_ID']):
     # good center observations
     SGA['Z_DESI'][SGA_idx] = np.average(good_centers['Z'][obs_idx], 
                                         weights=weights[obs_idx])
-    SGA['ZERR_DESI'][SGA_idx] = np.sqrt(1./np.sum(weights[obs_idx]))
+
+    # Compute uncertainty in the center redshift
+    if N_obs == 1 or np.all(np.abs(good_centers['ZERR_MOD'][obs_idx]/good_centers['Z'][obs_idx]) < 0.05):
+        SGA['ZERR_DESI'][SGA_idx] = np.sqrt(1./(N_obs*np.sum(weights[obs_idx])))
+    else:
+        z_random = np.zeros((N_obs, N_samples))
+
+        for i in range(N_obs):
+            z_random[i] = rng.normal(loc=good_centers['Z'][obs_idx][i], 
+                                     scale=good_centers['ZERR_MOD'][obs_idx][i], 
+                                     size=N_samples)
+
+        avg_z_random = np.average(z_random, 
+                                  weights=weights[obs_idx, None]*np.ones(N_samples), 
+                                  axis=0)
+        SGA['ZERR_DESI'][SGA_idx] = np.std(avg_z_random)
 ################################################################################
 
 
@@ -276,8 +303,6 @@ axis_dist = fuji_axis[np.in1d(fuji_axis['SGA_ID'], SGA_ID_dist)]
 #-------------------------------------------------------------------------------
 # for Coma galaxies
 #-------------------------------------------------------------------------------
-axis_inComa['SKY_FIBER_DIST'] = 0.
-axis_inComa['SKY_FIBER_DIST_R26'] = 0.
 axis_inComa['V_ROT'] = np.nan
 axis_inComa['V_ROT_ERR'] = np.nan
 
@@ -292,34 +317,35 @@ for sga_gal in np.unique(centers_inComa['SGA_ID']):
     # Find galaxy index in SGA catalog
     sga_idx = SGA_dict[sga_gal]
     
-    #---------------------------------------------------------------------------
-    # Calculate distance between each observation and the center
-    #---------------------------------------------------------------------------
-    center_coords = SkyCoord(ra=SGA['RA'][sga_idx], 
-                             dec=SGA['DEC'][sga_idx], 
-                             unit=u.degree)
-    target_coords = SkyCoord(ra=axis_inComa['RA'][obs_idx], 
-                             dec=axis_inComa['DEC'][obs_idx], 
-                             unit=u.degree)
-    
-    sep2d = target_coords.separation(center_coords)
-    
-    axis_inComa['SKY_FIBER_DIST'][obs_idx] = sep2d
-    axis_inComa['SKY_FIBER_DIST_R26'][obs_idx] = 2*sep2d.to('arcmin')/(SGA['D26'][sga_idx]*u.arcmin)
-    #---------------------------------------------------------------------------
-    
     
     #---------------------------------------------------------------------------
     # Calculate rotational velocity
     #---------------------------------------------------------------------------
     # Use the average redshift of all center observations for the systemic velocity
-    z_center = np.mean(SGA['Z_DESI'][sga_idx])
-    z_err_center2 = SGA['ZERR_DESI'][sga_idx]**2
+    z_center = SGA['Z_DESI'][sga_idx]
+    z_err_center = SGA['ZERR_DESI'][sga_idx]
 
     # Calculate rotational velocity for all observations of the galaxy
     z_rot = (1 + axis_inComa['Z'][obs_idx])/(1 + z_center) - 1
     axis_inComa['V_ROT'][obs_idx] = c*z_rot
-    axis_inComa['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_inComa['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_inComa['Z'][obs_idx])/(1 + z_center)**2) + (dv_sys/c).value**2)
+
+    # Calculate uncertainty in the rotational velocity
+    if np.all(np.abs(axis_inComa['ZERR_MOD'][obs_idx]/axis_inComa['Z'][obs_idx]) < 0.05) and (np.abs(z_err_center/z_center) < 0.05):
+        axis_inComa['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_inComa['ZERR_MOD'][obs_idx]/(1 + z_center))**2 + z_err_center**2*((1 + axis_inComa['Z'][obs_idx])/(1 + z_center)**2))
+    else:
+        z_center_random = rng.normal(loc=z_center, 
+                                     scale=z_err_center,
+                                     size=N_samples)
+        z_axis_random = np.zeros((np.sum(obs_idx), N_samples))
+
+        for i in range(np.sum(obs_idx)):
+            z_axis_random[i] = rng.normal(loc=axis_inComa['Z'][obs_idx][i], 
+                                          scale=axis_inComa['ZERR_MOD'][obs_idx][i], 
+                                          size=N_samples)
+
+        z_rot_random = (1 + z_axis_random)/(1 + z_center_random) - 1
+
+        axis_inComa['V_ROT_ERR'][obs_idx] = np.std(c*z_rot_random, axis=1)
     #---------------------------------------------------------------------------
     
     
@@ -340,8 +366,6 @@ for sga_gal in np.unique(centers_inComa['SGA_ID']):
 #-------------------------------------------------------------------------------
 # For 0-pt calibrators
 #-------------------------------------------------------------------------------
-axis_dist['SKY_FIBER_DIST'] = 0.
-axis_dist['SKY_FIBER_DIST_R26'] = 0.
 axis_dist['V_ROT'] = np.nan
 axis_dist['V_ROT_ERR'] = np.nan
 
@@ -356,36 +380,35 @@ for sga_gal in np.unique(centers_dist['SGA_ID']):
     # Find galaxy index in SGA catalog
     sga_idx = SGA_dict[sga_gal]
     
-    #---------------------------------------------------------------------------
-    # Calculate distance between each observation and the center
-    #---------------------------------------------------------------------------
-    center_coords = SkyCoord(ra=SGA['RA'][sga_idx], 
-                             dec=SGA['DEC'][sga_idx], 
-                             unit=u.degree)
-    target_coords = SkyCoord(ra=axis_dist['RA'][obs_idx], 
-                             dec=axis_dist['DEC'][obs_idx], 
-                             unit=u.degree)
-    
-    sep2d = target_coords.separation(center_coords)
-    
-    axis_dist['SKY_FIBER_DIST'][obs_idx] = sep2d
-    axis_dist['SKY_FIBER_DIST_R26'][obs_idx] = 2*sep2d.to('arcmin')/(SGA['D26'][sga_idx]*u.arcmin)
-    #---------------------------------------------------------------------------
-    
     
     #---------------------------------------------------------------------------
     # Calculate rotational velocity
     #---------------------------------------------------------------------------
     # Use the average redshift of all center observations for the systemic velocity
-    z_center = np.mean(SGA['Z_DESI'][sga_idx])
-    z_err_center2 = SGA['ZERR_DESI'][sga_idx]**2
+    z_center = SGA['Z_DESI'][sga_idx]
+    z_err_center = SGA['ZERR_DESI'][sga_idx]
 
     # Calculate rotational velocity for all observations of the galaxy
-    # axis_dist['V_ROT'][obs_idx] = c*(axis_dist['Z'][obs_idx] - z_center)
-    # axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt(axis_dist['ZERR'][obs_idx]**2 + z_err_center2)
     z_rot = (1 + axis_dist['Z'][obs_idx])/(1 + z_center) - 1
     axis_dist['V_ROT'][obs_idx] = c*z_rot
-    axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_dist['ZERR'][obs_idx]/(1 + z_center))**2 + z_err_center2*((1 + axis_dist['Z'][obs_idx])/(1 + z_center)**2))
+
+    # Calculate uncertainty in the rotational velocity
+    if np.all(np.abs(axis_dist['ZERR_MOD'][obs_idx]/axis_dist['Z'][obs_idx]) < 0.05) and (np.abs(z_err_center/z_center) < 0.05):
+        axis_dist['V_ROT_ERR'][obs_idx] = c*np.sqrt((axis_dist['ZERR_MOD'][obs_idx]/(1 + z_center))**2 + z_err_center**2*((1 + axis_dist['Z'][obs_idx])/(1 + z_center)**2))
+    else:
+        z_center_random = rng.normal(loc=z_center, 
+                                     scale=z_err_center,
+                                     size=N_samples)
+        z_axis_random = np.zeros((np.sum(obs_idx), N_samples))
+
+        for i in range(np.sum(obs_idx)):
+            z_axis_random[i] = rng.normal(loc=axis_dist['Z'][obs_idx][i], 
+                                          scale=axis_dist['ZERR_MOD'][obs_idx][i], 
+                                          size=N_samples)
+
+        z_rot_random = (1 + z_axis_random)/(1 + z_center_random) - 1
+
+        axis_dist['V_ROT_ERR'][obs_idx] = np.std(c*z_rot_random, axis=1)
     #---------------------------------------------------------------------------
     
     
@@ -655,7 +678,7 @@ VI_good_edge_spirals_axis_inComa = good_edge_spirals_axis_inComa[~remove_targets
 # Coma
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 SGA['V_0p33R26'] = np.nan
-SGA['V_0p33R26_err'] = np.nan
+SGA['V_0p33R26_ERR'] = np.nan
 
 weights = 1./(VI_good_edge_spirals_axis_inComa['V_ROT_ERR']**2)
 
@@ -663,11 +686,29 @@ for sga_id in np.unique(VI_good_edge_spirals_axis_inComa['SGA_ID']):
     
     # Identify all galaxy targets on this galaxy
     obs_idx = VI_good_edge_spirals_axis_inComa['SGA_ID'] == sga_id
-    
+
+    # Number of rotational velocity measurements for this galaxy
+    N_obs = np.sum(obs_idx)
+
+    # Calculate average rotational velocity for galaxy
     SGA['V_0p33R26'][SGA_dict[sga_id]] = np.average(np.abs(VI_good_edge_spirals_axis_inComa['V_ROT'][obs_idx]), 
                                                     weights=weights[obs_idx])
 
-    SGA['V_0p33R26_err'][SGA_dict[sga_id]] = np.sqrt(1./np.sum(weights[obs_idx]))
+    # Calculate uncertainty in average rotational velocity
+    if N_obs == 1 or np.all(np.abs(VI_good_edge_spirals_axis_inComa['V_ROT_ERR'][obs_idx]/VI_good_edge_spirals_axis_inComa['V_ROT'][obs_idx]) < 0.05):
+        SGA['V_0p33R26_ERR'][SGA_dict[sga_id]] = np.sqrt(1./(N_obs*np.sum(weights[obs_idx])))
+    else:
+        v_random = np.zeros((N_obs, N_samples))
+
+        for i in range(N_obs):
+            v_random[i] = rng.normal(loc=np.abs(VI_good_edge_spirals_axis_inComa['V_ROT'][obs_idx][i]), 
+                                     scale=VI_good_edge_spirals_axis_inComa['V_ROT_ERR'][obs_idx][i], 
+                                     size=N_samples)
+
+        v_avg_random = np.average(v_random, 
+                                  weights=weights[obs_idx, None]*np.ones(N_samples), 
+                                  axis=0)
+        SGA['V_0p33R26_ERR'][SGA_dict[sga_id]] = np.std(v_avg_random)
 
 # Make a catalog of just Coma galaxies with velocities
 SGA_TF = SGA[np.isfinite(SGA['V_0p33R26']) & (SGA['R_MAG_SB26'] > 0)]
@@ -675,10 +716,10 @@ SGA_TF = SGA[np.isfinite(SGA['V_0p33R26']) & (SGA['R_MAG_SB26'] > 0)]
 # 0-pt calibrators
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 SGA['V_0p33R26'] = np.nan
-SGA['V_0p33R26_err'] = np.nan
+SGA['V_0p33R26_ERR'] = np.nan
 
-good_edge_spirals_axis_dist['R_MAG_SB26'] = np.nan
-good_edge_spirals_axis_dist['R_MAG_SB26_ERR'] = np.nan
+# good_edge_spirals_axis_dist['R_MAG_SB26'] = np.nan
+# good_edge_spirals_axis_dist['R_MAG_SB26_ERR'] = np.nan
 
 weights = 1./(good_edge_spirals_axis_dist['V_ROT_ERR']**2)
 
@@ -686,11 +727,29 @@ for sga_id in np.unique(good_edge_spirals_axis_dist['SGA_ID']):
     
     # Identify all galaxy targets on this galaxy
     obs_idx = good_edge_spirals_axis_dist['SGA_ID'] == sga_id
-    
+
+    # Number of measures of the rotational velocity of this galaxy
+    N_obs = np.sum(obs_idx)
+
+    # Calculate average rotational velocity
     SGA['V_0p33R26'][SGA_dict[sga_id]] = np.average(np.abs(good_edge_spirals_axis_dist['V_ROT'][obs_idx]), 
                                                     weights=weights[obs_idx])
 
-    SGA['V_0p33R26_err'][SGA_dict[sga_id]] = np.sqrt(1./np.sum(weights[obs_idx]))
+    # Calculate uncertainty in the average rotational velocity
+    if N_obs == 1 or np.all(np.abs(good_edge_spirals_axis_dist['V_ROT_ERR'][obs_idx]/good_edge_spirals_axis_dist['V_ROT'][obs_idx]) < 0.05):
+        SGA['V_0p33R26_ERR'][SGA_dict[sga_id]] = np.sqrt(1./(N_obs*np.sum(weights[obs_idx])))
+    else:
+        v_random = np.zeros((N_obs, N_samples))
+
+        for i in range(N_obs):
+            v_random[i] = rng.normal(loc=np.abs(good_edge_spirals_axis_dist['V_ROT'][obs_idx][i]), 
+                                     scale=good_edge_spirals_axis_dist['V_ROT_ERR'][obs_idx][i], 
+                                     size=N_samples)
+
+        v_avg_random = np.average(v_random, 
+                                  weights=weights[obs_idx, None]*np.ones(N_samples), 
+                                  axis=0)
+        SGA['V_0p33R26_ERR'][SGA_dict[sga_id]] = np.std(v_avg_random)
 
 # Make a catalog of just 0-pt galaxies with velocities
 SGA_0pt = SGA[np.isfinite(SGA['V_0p33R26']) & (SGA['R_MAG_SB26'] > 0)]
@@ -778,7 +837,7 @@ SGA_0pt['R_MAG_SB26_ERR_CORR'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR']**2 + zpt_dust
 # distance moduli
 #-------------------------------------------------------------------------------
 SGA_0pt['R_ABSMAG_SB26'] = SGA_0pt['R_MAG_SB26_CORR'] - SGA_0pt['DM1_SN']
-SGA_0pt['R_ABSMAG_SB26_err'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR_CORR']**2 + SGA_0pt['e_DM1_SN']**2)
+SGA_0pt['R_ABSMAG_SB26_ERR'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR_CORR']**2 + SGA_0pt['e_DM1_SN']**2)
 ################################################################################
 
 
@@ -791,7 +850,7 @@ SGA_0pt['R_ABSMAG_SB26_err'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR_CORR']**2 + SGA_0
 # First, define the line perpendicular to the calibration
 #-------------------------------------------------------------------------------
 logV_n17 = (-17 - b_fit[1])/m_fit + V0
-b_perp = -17 + w0_fit*(logV_n17 - V0)
+b_perp = -17 + (logV_n17 - V0)/m_fit
 #-------------------------------------------------------------------------------
 '''
 #-------------------------------------------------------------------------------
@@ -816,7 +875,7 @@ yvals = np.zeros((len(b_fit), len(xvals)))
 for i in range(len(b_fit)):
     yvals[i] = m_fit * (xvals - V0) + b_fit[i]
     
-yvals_perp = -w0_fit*(xvals - V0) + (b_perp + b_fit[0] - b_fit[1])
+yvals_perp = -(xvals - V0)/m_fit + (b_perp + b_fit[0] - b_fit[1])
 
 
 #-------------------------------------------------------------------------------
@@ -835,17 +894,17 @@ y_chain2_quantiles = np.quantile(y_chain2, [0.1587, 0.8414], axis=1)
 #-------------------------------------------------------------------------------
 '''
 data1 = [np.log10(SGA_TF_bright['V_0p33R26']), SGA_TF_bright['R_MAG_SB26_CORR']]
-x1_err = 0.434*SGA_TF_bright['V_0p33R26_err']/SGA_TF_bright['V_0p33R26']
+x1_err = 0.434*SGA_TF_bright['V_0p33R26_ERR']/SGA_TF_bright['V_0p33R26']
 y1_err = SGA_TF_bright['R_MAG_SB26_ERR_CORR']
 '''
 data1 = [np.log10(SGA_TF['V_0p33R26']), SGA_TF['R_MAG_SB26_CORR']]
-x1_err = 0.434*SGA_TF['V_0p33R26_err']/SGA_TF['V_0p33R26']
+x1_err = 0.434*SGA_TF['V_0p33R26_ERR']/SGA_TF['V_0p33R26']
 y1_err = SGA_TF['R_MAG_SB26_ERR_CORR']
 corr1_xy = np.zeros_like(x1_err)
 
 data2 = [np.log10(SGA_0pt['V_0p33R26']), SGA_0pt['R_ABSMAG_SB26']]
-x2_err = 0.434*SGA_0pt['V_0p33R26_err']/SGA_0pt['V_0p33R26']
-y2_err = SGA_0pt['R_ABSMAG_SB26_err']
+x2_err = 0.434*SGA_0pt['V_0p33R26_ERR']/SGA_0pt['V_0p33R26']
+y2_err = SGA_0pt['R_ABSMAG_SB26_ERR']
 corr2_xy = np.zeros_like(x2_err)
 #-------------------------------------------------------------------------------
 
@@ -855,7 +914,7 @@ corr2_xy = np.zeros_like(x2_err)
 #-------------------------------------------------------------------------------
 data_dwarfs = [np.log10(SGA_TF['V_0p33R26'][dwarfs]), 
                SGA_TF['R_MAG_SB26'][dwarfs]]
-x_err_dwarfs = 0.434*SGA_TF['V_0p33R26_err'][dwarfs]/SGA_TF['V_0p33R26'][dwarfs]
+x_err_dwarfs = 0.434*SGA_TF['V_0p33R26_ERR'][dwarfs]/SGA_TF['V_0p33R26'][dwarfs]
 y_err_dwarfs = SGA_TF['R_MAG_SB26_ERR'][dwarfs]
 corr_xy_dwarfs = np.zeros_like(x_err_dwarfs)
 #-------------------------------------------------------------------------------
@@ -983,7 +1042,7 @@ ax1.set_ylim(-19.5, -23)
 #-------------------------------------------------------------------------------
 # Save the figure
 #-------------------------------------------------------------------------------
-plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_AnthonyUpdates_weightsVmax-1_dVsys_20250523.png', 
+plt.savefig('../../Figures/SV/fuji_joint-Coma-0pt_TFR_varyV0-perpdwarfs_AnthonyUpdates_weightsVmax-1_dVsys_20250620.png', 
             dpi=150, 
             facecolor='none')
 #-------------------------------------------------------------------------------

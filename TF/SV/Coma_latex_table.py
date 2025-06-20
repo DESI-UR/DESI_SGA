@@ -25,7 +25,7 @@ import numpy as np
 data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
 
 # Output LaTeX file name
-latex_filename = 'fuji_Coma_cal_galaxies_20250523.tex'
+latex_filename = 'fuji_Coma_cal_galaxies_20250620.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -133,14 +133,14 @@ def latex_3err(error):
 def latex_zerr(error):
     # err = '{:.2f}'.format(1e6*error)
     # return '$\\pm$({0}'.format(err) + '$\\times 10^{-6})$'
-    err = '{:.0f}'.format(1e6*error)
+    err = '{:.0f}'.format(1e5*error)
     return '({0})'.format(err)
 
 
 format_dict = {'SGA_ID':'%7d',
                'RA':'{:.6f}', #latex_ra, 
                'DEC':'{:.6f}', #latex_dec,
-               'Z_DESI':'{:.6f}', 
+               'Z_DESI':'{:.5f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
