@@ -842,6 +842,54 @@ SGA_0pt['R_ABSMAG_SB26_ERR'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR_CORR']**2 + SGA_0
 
 
 
+################################################################################
+# Save figure data for paper
+#-------------------------------------------------------------------------------
+# Header
+#-------------------------------------------------------------------------------
+hdr = fits.Header()
+
+hdr['DESI_DR'] = 'EDR'
+hdr['FIGURE'] = 7
+
+empty_primary = fits.PrimaryHDU(header=hdr)
+#-------------------------------------------------------------------------------
+# Data
+#-------------------------------------------------------------------------------
+coma_hdu = fits.BinTableHDU(data=SGA_TF['R_MAG_SB26_CORR', 'R_MAG_SB26_ERR_CORR', 'V_0p33R26', 'V_0p33R26_ERR'], 
+                            name='CAL')
+coma_hdu.columns['R_MAG_SB26_CORR'].name = 'R_MAG'
+coma_hdu.columns['R_MAG_SB26_ERR_CORR'].name = 'R_MAG_ERR'
+coma_hdu.columns['V_0p33R26'].name = 'VROT'
+coma_hdu.columns['V_0p33R26_ERR'].name = 'VROT_ERR'
+
+zpt_hdu = fits.BinTableHDU(data=SGA_0pt['R_ABSMAG_SB26', 'R_ABSMAG_SB26_ERR', 'V_0p33R26', 'V_0p33R26_ERR'],
+                           name='0PT')
+zpt_hdu.columns['R_ABSMAG_SB26'].name = 'R_ABSMAG'
+zpt_hdu.columns['R_ABSMAG_SB26_ERR'].name = 'R_ABSMAG_ERR'
+zpt_hdu.columns['V_0p33R26'].name = 'VROT'
+zpt_hdu.columns['V_0p33R26_ERR'].name = 'VROT_ERR'
+
+hdul = fits.HDUList([empty_primary, coma_hdu, zpt_hdu])
+
+hdul.writeto('paper_figures/Fig7/fig7_data.fits', overwrite=True)
+#-------------------------------------------------------------------------------
+# Header
+#-------------------------------------------------------------------------------
+hdr2 = fits.Header()
+
+hdr2['DESI_DR'] = 'EDR'
+hdr2['FIGURE'] = 8
+hdr2['LOG_V0'] = float(f'{V0:.3f}')
+#-------------------------------------------------------------------------------
+# Data
+#-------------------------------------------------------------------------------
+mcmcfit_hdu = fits.PrimaryHDU(header=hdr2, data=tfr_samples)
+
+mcmcfit_hdu.writeto('paper_figures/Fig8/fig8_data.fits', overwrite=True)
+################################################################################
+exit()
+
 
 # THERE ARE NO DWARF GALAXIES IN THIS CALIBRATION
 ################################################################################
