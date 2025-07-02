@@ -113,7 +113,7 @@ def latex_3err(error):
 def latex_zerr(error):
     # err = '{:.2f}'.format(1e6*error)
     # return '$\\pm$({0}'.format(err) + '$\\times 10^{-6})$'
-    err = '{:.0f}'.format(1e6*error)
+    err = '{:.0f}'.format(1e5*error)
     return '({0})'.format(err)
 
 def latex_verr(error):
@@ -124,7 +124,7 @@ def latex_verr(error):
 format_dict = {'SGA_ID':'%7d',
                'RA':'{:.6f}', #latex_ra, 
                'DEC':'{:.6f}', #latex_dec, 
-               'Z_DESI':'{:.6f}', 
+               'Z_DESI':'{:.5f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
