@@ -35,19 +35,19 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-data_directory = 'SV/'
-# data_directory = 'Y1/'
+# data_directory = 'SV/'
+data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
 # filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
-filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_zCMB0p1_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax-1_moduli.fits'
 # filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_AnthonyUpdates_weightsVmax-1_moduli.fits'
-# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_AnthonyUpdates_weightsVmax-1_dVsys_moduli.fits'
+filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_AnthonyUpdates_weightsVmax-1_dVsys_moduli.fits'
 
 hdul = fits.open(data_directory + filename)
 galaxies = Table(hdul[1].data)
