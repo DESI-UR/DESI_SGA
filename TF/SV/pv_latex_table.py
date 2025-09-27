@@ -1,5 +1,5 @@
 '''
-Create LaTeX data table of galaxies w/ PVs with the data formatted for the 
+Create LaTeX data table of galaxies w/ PVs with the data formatted for the SV 
 paper.
 '''
 
@@ -25,7 +25,7 @@ import numpy as np
 data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli_pec-Watkins15.fits'
 
 # Output LaTeX file name
-latex_filename = 'SV/fuji_TF_pv_short.tex'
+latex_filename = 'fuji_TF_pv_short.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -62,7 +62,7 @@ tab_label = 'tab:pv'
 ################################################################################
 # Read in galaxy data
 #-------------------------------------------------------------------------------
-data_table = Table.read(data_filename)
+data_table = Table.read(data_directory + data_filename)
 ################################################################################
 
 
