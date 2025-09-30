@@ -97,6 +97,11 @@ plt.figure(figsize=(5,7), tight_layout=True)
 
 plt.grid(ls=':')
 
+plt.hexbin(np.log10(SGA_TF['V_0p4R26'][main]), 
+           SGA_TF['R_ABSMAG_SB26'][main], 
+           cmap='CMRmap_r')
+plt.colorbar(label='Number of galaxies')
+
 # plt.fill_between(logv, line_err[0], line_err[1], color='lightgray')
 
 plt.errorbar(np.log10(SGA_TF['V_0p4R26'][~main]), 
@@ -108,14 +113,14 @@ plt.errorbar(np.log10(SGA_TF['V_0p4R26'][~main]),
              alpha=0.1, 
              ecolor='gray')
 
-plt.errorbar(np.log10(SGA_TF['V_0p4R26'][main]), 
-             SGA_TF['R_ABSMAG_SB26'][main], 
-             xerr=0.434*SGA_TF['V_0p4R26_ERR'][main]/SGA_TF['V_0p4R26'][main],
-             yerr=SGA_TF['R_ABSMAG_SB26_ERR'][main], 
-             fmt='.', 
-             markersize=4, 
-             alpha=0.5, 
-             ecolor='gray')
+# plt.errorbar(np.log10(SGA_TF['V_0p4R26'][main]), 
+#              SGA_TF['R_ABSMAG_SB26'][main], 
+#              xerr=0.434*SGA_TF['V_0p4R26_ERR'][main]/SGA_TF['V_0p4R26'][main],
+#              yerr=SGA_TF['R_ABSMAG_SB26_ERR'][main], 
+#              fmt='.', 
+#              markersize=4, 
+#              alpha=0.5, 
+#              ecolor='gray')
 
 plt.plot(logv, absmag, 'k', zorder=3)
 plt.plot(logv, absmag + sig, 'k:', zorder=4)
@@ -130,9 +135,9 @@ plt.ylabel('$M_r^{0.1} (26) - 5\log h$', fontsize=14);
 ax = plt.gca()
 ax.tick_params(axis='both', which='major', labelsize=12);
 
-# plt.show()
+plt.show()
 
-plt.savefig('../../../figures/Y1_papers/iron_TFR_dz0p005_weightsVmax-1_cutsAlex_20250926.png', 
-            dpi=150, 
-            facecolor='none')
+# plt.savefig('../../../figures/Y1_papers/iron_TFR_dz0p005_weightsVmax-1_cutsAlex_20250926.png', 
+#             dpi=150, 
+#             facecolor='none')
 ################################################################################
