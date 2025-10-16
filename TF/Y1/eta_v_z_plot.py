@@ -135,7 +135,7 @@ ax_histy.hist(SGA_TF['LOGDIST'][sample1],
               color='tab:blue')
 
 ax_histy.tick_params(axis='y', labelleft=False)
-ax_histy.set_xlabel('count');
+ax_histy.set_xlabel('count')
 #-------------------------------------------------------------------------------
 
 # plt.show()
