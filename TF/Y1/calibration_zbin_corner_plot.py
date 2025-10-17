@@ -37,13 +37,32 @@ mask[-2] = False
 
 
 ################################################################################
+# Limits for each parameter in the corner plot
+#-------------------------------------------------------------------------------
+values = np.median(tfr_mcmc_samples, axis=1)
+sigmas = np.sqrt(np.diag(cov_tfr))
+
+multiple = 3.5
+
+limits = []
+
+for i in range(len(values)):
+    if i != len(values) - 2: # Need to skip the last z-bin
+        limits.append([values[i] - multiple*sigmas[i], 
+                       values[i] + multiple*sigmas[i]])
+################################################################################
+
+
+
+################################################################################
 # Plot
 #-------------------------------------------------------------------------------
 labels  = ['$a$']
 labels += [f'$b_{{ {k+1} }}$' for k in np.arange(m)]
 labels += [r'$\sigma$']
 
-fig = corner(tfr_mcmc_samples[mask].T, bins=25, smooth=1,
+fig = corner(tfr_mcmc_samples[mask].T, bins=25, smooth=1, 
+             range=limits, 
              labels=labels,
              label_kwargs={'fontsize':18},
              labelpad=0.1,
@@ -54,6 +73,7 @@ fig = corner(tfr_mcmc_samples[mask].T, bins=25, smooth=1,
              plot_datapoints=False,
              fill_contours=True,
              show_titles=True,
+             title_fmt='.3f', 
              title_kwargs={"fontsize": 18, 'loc':'left', 'pad':10});
 
 for ax in fig.get_axes():
@@ -61,7 +81,7 @@ for ax in fig.get_axes():
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_zbin_calibration_dz0p005_weightsVmax-1_cutsAlex_20250926.png', 
+plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v14.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
