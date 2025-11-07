@@ -7,7 +7,7 @@ plot the binned values.
 # Import modules
 #-------------------------------------------------------------------------------
 from astropy.table import Table
-from astropy.cosmology import LambdaCDM, Planck18
+from astropy.cosmology import FlatLambdaCDM
 import astropy.constants as const
 
 import numpy as np
@@ -44,13 +44,7 @@ LightSpeed = const.c.to('km/s').value
 h = 1
 H0 = 100*h
 
-cosmo = LambdaCDM(H0=H0, 
-                  Om0=Planck18.Om0, 
-                  Tcmb0=Planck18.Tcmb0, 
-                  Neff=Planck18.Neff, 
-                  m_nu=Planck18.m_nu, 
-                  Ob0=Planck18.Ob0, 
-                  Ode0=Planck18.Ode0)
+cosmo = FlatLambdaCDM(H0=H0, Om0=0.3151)
 ################################################################################
 
 
