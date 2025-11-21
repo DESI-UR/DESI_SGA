@@ -38,7 +38,8 @@ col_names = ['SGA_ID',
              'R_MAG_SB26', 
              'V_0p4R26',
              'MU_TF',
-             'LOGDIST'
+             'LOGDIST', 
+             'MAIN'
              ]
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
@@ -48,10 +49,10 @@ err_dict = {'Z_DESI':'ZERR_DESI',
             }
 
 # Column header for table
-colhead = '\\tablehead{\\colhead{SGA-2020 ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.4R_{26})$} & \\colhead{$\mu$} & \\colhead{$\eta$} \\\[-0.5em] & [\text{deg}] & [\text{deg}] & & [arcmin] & [\\text{AB mag}] & [\\text{km/s}] & [\\text{AB mag}] & }'
+colhead = '\\tablehead{\\colhead{SGA-2020} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.4R_{26})$} & \\colhead{$\mu$} & \\colhead{$\eta$} & \\colhead{Main} \\\[-0.5em] \\colhead{ID} & \\colhead{[deg]} & \\colhead{[deg]} & & \colhead{[arcmin]} & \colhead{[AB mag]} & \\colhead{[km/s]} & \\colhead{[AB mag]} & & \\colhead{sample}}'
 
 # Table foot (caption, footnotes)
-tabfoot = '\\tablecomments{{Five} of the \\Ntot galaxies in the DESI DR1 TF catalog.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ $r$-band isophote are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI DR1 spectra, and rotational velocities at $0.4R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are calculated from the calibrated TFR, and the log distance ratios are based on the difference between the observed and predicted distance moduli.  Table~\\ref{tab:pv} is published in its entirety online in a machine-readable format.  A portion is shown here for guidance regarding its form and content.}'
+tabfoot = '\\tablecomments{{Ten} of the \\Ntot galaxies in the DESI DR1 TF catalog.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ $r$-band isophote are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI DR1 spectra, and rotational velocities at $0.4R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are calculated from the calibrated TFR, and the log distance ratios are based on the difference between the observed and predicted distance moduli.  Table~\\ref{tab:pv} is published in its entirety online in a machine-readable format.  A portion is shown here for guidance regarding its form and content.}'
 
 # Table name
 tab_name = 'DESI DR1 TF catalog'
@@ -77,10 +78,10 @@ data_table = Table.read(data_directory + data_filename)
 out_table = Table()
 
 for name in col_names:
-    out_table[name] = data_table[name][:5]
+    out_table[name] = data_table[name][:10]
     
     if name in err_dict.keys():
-        out_table[err_dict[name]] = data_table[err_dict[name]][:5]
+        out_table[err_dict[name]] = data_table[err_dict[name]][:10]
 ################################################################################
 
 
@@ -110,19 +111,20 @@ def latex_zerr(error):
     
 
 format_dict = {'SGA_ID':'%7d',
-               'RA':'{:.6f}', 
-               'DEC':'{:.6f}', 
+               'RA':'{:.4f}', 
+               'DEC':'{:.4f}', 
                'Z_DESI':'{:.5f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
-               'R_MAG_SB26_ERR':latex_3err,
+               'R_MAG_SB26_ERR':latex_2err,
                'V_0p4R26':'{:.1f}',
                'V_0p4R26_ERR':latex_1err, 
                'MU_TF':'{:.2f}', 
                'MU_TF_ERR':latex_2err, 
                'LOGDIST':'{:.2f}', 
-               'LOGDIST_ERR':latex_2err}
+               'LOGDIST_ERR':latex_2err, 
+               'MAIN':'%s'}
 #-------------------------------------------------------------------------------
 # Format table
 #-------------------------------------------------------------------------------

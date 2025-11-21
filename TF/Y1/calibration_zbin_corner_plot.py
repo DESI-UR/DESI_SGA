@@ -20,7 +20,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_v14.pickle', 'rb')
+temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250810.pickle', 
+                   'rb')
 cov_tfr, tfr_mcmc_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
 
@@ -81,7 +82,7 @@ for ax in fig.get_axes():
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v14.png', 
+plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v13.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################

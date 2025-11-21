@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
-SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v14.fits')
+SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
 
 # Plot those in the main cosmology sample differently
 sample1 = SGA_TF['MAIN']
@@ -65,14 +65,18 @@ sigma_bins = np.arange(0.09, 0.2, 0.003)
 
 plt.hist(SGA_TF['LOGDIST_ERR'][sample1], 
          bins=sigma_bins, 
-         color='darkblue')
+         color='darkblue', 
+         label='main')
 plt.hist(SGA_TF['LOGDIST_ERR'][~sample1], 
          bins=sigma_bins, 
-         color='darkgray')
+         color='darkgray', 
+         label='dwarf')
 plt.hist(SGA_TF['LOGDIST_ERR'][sample1], 
          bins=sigma_bins, 
          histtype='step',
          color='darkblue')
+
+plt.legend()
 
 plt.xlabel(r'$\sigma_{\eta}$', fontsize=16)
 
@@ -83,7 +87,7 @@ plt.tick_params(axis='x', which='major', labelsize=14)
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/iron_logdist_hists_v14.png', 
+plt.savefig('../../../figures/Y1_papers/iron_logdist_hists_v13.png', 
             dpi=150, 
             facecolor='none');
 ################################################################################

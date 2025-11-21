@@ -21,7 +21,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_v14.pickle', 'rb')
+temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 
+                   'rb')
 cov_tfr, tfr_mcmc_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
 ################################################################################
@@ -34,7 +35,7 @@ temp_infile.close()
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
-TF_Y1 = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v14.fits')
+TF_Y1 = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
 ################################################################################
 
 
@@ -62,7 +63,7 @@ for i in range(len(TF_Y1)):
 # John's VI
 is_good_John = TF_Y1['JOHN_VI'].mask
 
-gals = TF_Y1[main & is_good_incl & is_good_morph_ML & is_good_John]
+good_gals = TF_Y1[main & is_good_incl & is_good_morph_ML & is_good_John]
 ################################################################################
 
 
@@ -70,15 +71,14 @@ gals = TF_Y1[main & is_good_incl & is_good_morph_ML & is_good_John]
 ################################################################################
 # Assign galaxies to redshift bins
 #-------------------------------------------------------------------------------
-zbin_indices = np.digitize(gals['Z_DESI_CMB'], zbins, right=True)
+good_gals['Z_BIN_IDX'] = np.digitize(good_gals['Z_DESI_CMB'], zbins, right=True)
 
-# For those galaxies that fall outside the calibration range, assign them to the 
-# closest bin
-zbin_indices[zbin_indices == 0] = 1
-zbin_indices[zbin_indices == len(zbins)] = len(zbins) - 1
+# Remove galaxies that fall outside the calibration range
+no_use = (good_gals['Z_BIN_IDX'] == 0) | (good_gals['Z_BIN_IDX'] == len(zbins))
+gals = good_gals[~no_use]
 
 # Find list of all zbin indices
-_zbin_ids = np.unique(zbin_indices)
+_zbin_ids = np.unique(gals['Z_BIN_IDX'])
 m = len(_zbin_ids)
 
 # Pack the galaxies into arrays
@@ -88,7 +88,7 @@ mag, mag_err = [], []
 # Loop over the redshift bins
 for k, _zbin_id in enumerate(_zbin_ids):
 
-    select_zbin = np.isin(zbin_indices, _zbin_id)
+    select_zbin = gals['Z_BIN_IDX'] == _zbin_id
 
     logV.append(np.log10(gals['V_0p4R26'][select_zbin]) - logV0)
     logV_err.append(0.434*gals['V_0p4R26_ERR'][select_zbin] / gals['V_0p4R26'][select_zbin])
@@ -135,8 +135,9 @@ _logv = np.arange(0, 3, 0.1) - logV0
 a_   = a_mcmc[1]
 b_   = b_mcmc[:,1]
 
-color = iter(plt.cm.cool(np.linspace(0,1,m)))
-for i in range(m-1):
+# color = iter(plt.cm.cool(np.linspace(0,1,m)))
+color = iter(plt.cm.winter(np.linspace(0,1,m)))
+for i in range(m):
     c = next(color)
     
     row = int(i/7)
@@ -161,7 +162,7 @@ fig.supylabel(r'$m_r^{0.1} (26)$');
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TF_Y1_zbin_calibration-array_dz0p005_weightsVmax-1_cutsAlex_20250926.png', 
+plt.savefig('../../../figures/Y1_papers/TF_Y1_zbin_calibration-array_v13-winter.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
