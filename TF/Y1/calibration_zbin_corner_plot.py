@@ -62,11 +62,13 @@ labels  = ['$a$']
 labels += [f'$b_{{ {k+1} }}$' for k in np.arange(m)]
 labels += [r'$\sigma$']
 
-fig = corner(tfr_mcmc_samples[mask].T, bins=25, smooth=1, 
+fig = plt.figure(figsize=(50,50))
+
+corner(tfr_mcmc_samples[mask].T, bins=25, smooth=1, 
              range=limits, 
              labels=labels,
              label_kwargs={'fontsize':18},
-             labelpad=0.1,
+             # labelpad=0.1,
              levels=(1-np.exp(-0.5), 1-np.exp(-2)),
              quantiles=[0.16, 0.5, 0.84],
              color='tab:blue',
@@ -75,10 +77,14 @@ fig = corner(tfr_mcmc_samples[mask].T, bins=25, smooth=1,
              fill_contours=True,
              show_titles=True,
              title_fmt='.3f', 
-             title_kwargs={"fontsize": 18, 'loc':'left', 'pad':10});
+             title_kwargs={"fontsize": 18, 'loc':'left', 'pad':10}, 
+             # fig=fig
+             );
 
 for ax in fig.get_axes():
     ax.tick_params(axis='both', which='major', labelsize=16)
+
+# plt.tight_layout()
 
 # plt.show()
 

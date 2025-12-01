@@ -39,11 +39,11 @@ z_bins = np.arange(0, 0.175, 0.005)
 plt.hist(SGA_TF['Z_DESI_CMB'][sample1], 
          bins=z_bins, 
          color='darkblue', 
-         label='main')
+         label='Main Sample')
 plt.hist(SGA_TF['Z_DESI_CMB'][~sample1], 
          bins=z_bins, 
          color='darkgray', 
-         label='dwarf')
+         label='Dwarfs')
 plt.hist(SGA_TF['Z_DESI_CMB'][sample1], 
          bins=z_bins, 
          color='darkblue', 

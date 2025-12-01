@@ -66,11 +66,11 @@ sigma_bins = np.arange(0.09, 0.2, 0.003)
 plt.hist(SGA_TF['LOGDIST_ERR'][sample1], 
          bins=sigma_bins, 
          color='darkblue', 
-         label='main')
+         label='Main Sample')
 plt.hist(SGA_TF['LOGDIST_ERR'][~sample1], 
          bins=sigma_bins, 
          color='darkgray', 
-         label='dwarf')
+         label='Dwarfs')
 plt.hist(SGA_TF['LOGDIST_ERR'][sample1], 
          bins=sigma_bins, 
          histtype='step',
