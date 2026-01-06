@@ -8,6 +8,7 @@ subplot.  It does not contain any of the fitting procedures.
 #-------------------------------------------------------------------------------
 import numpy as np
 
+from astropy.io import fits
 from astropy.table import Table
 import astropy.units as u
 
@@ -108,6 +109,49 @@ for i in range(len(zbins) + 1):
         print(f'{i:2d}  {zbins[i-1]:0.3f} < z <= {zbins[i]:0.3f}  {np.sum(zbin_indices == i):3d} galaxies')
 '''
 
+'''
+################################################################################
+# Save figure data for paper
+#-------------------------------------------------------------------------------
+# Header
+#-------------------------------------------------------------------------------
+hdr = fits.Header()
+
+hdr['DESI_DR'] = 'DR1'
+hdr['FIGURE'] = 6
+
+empty_primary = fits.PrimaryHDU(header=hdr)
+#-------------------------------------------------------------------------------
+# Data
+#-------------------------------------------------------------------------------
+hdulist = [empty_primary]
+
+for i in range(m):
+    gal_hdu = fits.BinTableHDU(data=Table([logV[i], logV_err[i], mag[i], mag_err[i]], 
+                                          names=('LOGV', 'LOGV_ERR', 'R_MAG', 'R_MAG_ERR')))
+    hdulist.append(gal_hdu)
+
+hdul = fits.HDUList(hdulist)
+
+hdul.writeto('paper_figures/Fig6/fig6_data.fits', overwrite=True)
+#-------------------------------------------------------------------------------
+# Header
+#-------------------------------------------------------------------------------
+hdr2 = fits.Header()
+
+hdr2['DESI_DR'] = 'DR1'
+hdr2['FIGURE'] = 7
+hdr2['LOG_V0'] = float(f'{logV0:.3f}')
+#-------------------------------------------------------------------------------
+# Data
+#-------------------------------------------------------------------------------
+mcmcfit_hdul = fits.PrimaryHDU(header=hdr2, data=tfr_mcmc_samples)
+
+mcmcfit_hdul.writeto('paper_figures/Fig7/fig7_data.fits', overwrite=True)
+################################################################################
+exit()
+'''
+
 
 ################################################################################
 # Pull out best-fit MCMC samples
@@ -157,8 +201,8 @@ for i in range(m):
 # Delete extra axes
 # fig.delaxes(axs[-1,-1])
 
-fig.supxlabel(r'$\log{(V(0.4R_{26})~[\mathrm{km/s}]}$)')
-fig.supylabel(r'$m_r^{0.1} (26)$');
+fig.supxlabel(r'$\log{(V(0.4R_{26})~[\mathrm{km/s}]}$)', fontsize=16)
+fig.supylabel(r'$m_r^{0.1} (26)$', fontsize=16);
 
 # plt.show()
 
