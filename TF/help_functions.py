@@ -12,7 +12,7 @@ import colorsys
 def profile_histogram(x, y, xbins, 
                       yerr=None, 
                       weights=None, 
-                      median=False, 
+                      stat='mean', 
                       weighted=False):
     """
     Compute a profile histogram from scattered data.
@@ -30,8 +30,8 @@ def profile_histogram(x, y, xbins,
     weights : list or ndarray
         If not None (and weighted=True), will use this instead of yerr to weight 
         the summary statistics.
-    median : bool
-        If true, compute median as central value; else, the (weighted) mean.
+    stat : string
+        Statistic to compute in each bin.  Default is mean.
     weighted : bool
         Weight the summary statistics, either by the uncertainty in y or the 
         provided weights.
@@ -67,8 +67,8 @@ def profile_histogram(x, y, xbins,
         h = mean
         e = np.sqrt((mean2 - mean**2) / (N - 1))
 
-    if median:
-        h = binned_statistic(x, y, bins=xbins, statistic='median').statistic
+    if stat != 'mean':
+        h = binned_statistic(x, y, bins=xbins, statistic=stat).statistic
     
     return N, h, e
 ################################################################################
