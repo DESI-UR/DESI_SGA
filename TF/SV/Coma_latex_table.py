@@ -1,5 +1,5 @@
 '''
-Create LaTeX data table of Coma galaxies with the data formatted for the table.
+Create LaTeX data table of Coma galaxies with the data formatted for the paper.
 '''
 
 
@@ -20,10 +20,12 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data file name
-data_filename = 'SGA_fuji_ITFR_moduli.fits'
+# data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+# data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
 
 # Output LaTeX file name
-latex_filename = 'fuji_Coma_cal_galaxies.tex'
+latex_filename = 'fuji_Coma_cal_galaxies_20250620.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -35,13 +37,13 @@ col_names = ['SGA_ID',
              'V_0p33R26']
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
-            'V_0p33R26':'V_0p33R26_err'}
+            'V_0p33R26':'V_0p33R26_ERR'}
 
 # Column header for table
-colhead = '\\tablehead{\\colhead{SGA ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\multicolumn{2}{c}{Redshift} & \\colhead{$D(26)$ [arcmin]} & \\multicolumn{2}{c}{$m_r(26)$} & \\multicolumn{2}{c}{$V(0.33R_{26})$ [km/s]}}'
+colhead = '\\tablehead{\\colhead{SGA-2020 ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.33R_{26})$} \\\[-0.5em] & [deg] & [deg] & & [arcmin] & [\\text{AB mag}] & [\\text{km/s}]}'
 
 # Table foot (caption, footnotes)
-tabfoot = '\\tablecomments{{List} of the 42 galaxies in the Coma cluster used for calibrating the slope of the TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$ band are from the SGA.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.}'
+tabfoot = '\\tablecomments{{List} of the \\NComaBright galaxies in the Coma cluster used for calibrating the slope of the TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$-band are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.}'
 
 # Table name
 tab_name = 'Coma cluster galaxies used for TFR slope calibration'
@@ -71,16 +73,16 @@ for i in range(len(data_table)):
 ################################################################################
 # Galaxies to include
 #-------------------------------------------------------------------------------
-SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration.txt', 
+SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration-20250523.txt', 
                         format='ascii.commented_header')
 
 cal_boolean = np.zeros(len(data_table), dtype=bool)
 
 for i in range(len(SGAIDs_cal)):
     
-    if SGAIDs_cal['SGAID'][i] in data_table_dict.keys():
+    if SGAIDs_cal['SGA_ID'][i] in data_table_dict.keys():
         
-        cal_boolean[data_table_dict[SGAIDs_cal['SGAID'][i]]] = True
+        cal_boolean[data_table_dict[SGAIDs_cal['SGA_ID'][i]]] = True
 ################################################################################
 
 
@@ -116,6 +118,10 @@ def latex_dec(angle):
     d,m,s = Angle(angle, unit=u.deg).dms
     return sign + '\\dec{{{0}}}{{{1}}}{{{2}}}{{{3}}}'.format('{:02d}'.format(int(abs(d))), '{:02d}'.format(int(abs(m))), '{:02d}'.format(int(abs(s))), '{:.2f}'.format(abs(s) - int(abs(s)))[1:])
 
+def latex_1err(error):
+    err = '{:.1f}'.format(error)
+    return '$\\pm${0}'.format(err)
+
 def latex_2err(error):
     err = '{:.2f}'.format(error)
     return '$\\pm${0}'.format(err)
@@ -125,19 +131,22 @@ def latex_3err(error):
     return '$\\pm${0}'.format(err)
 
 def latex_zerr(error):
-    err = '{:.2f}'.format(1e6*error)
-    return '$\\pm$({0}'.format(err) + '$\\times 10^{-6})$'
+    # err = '{:.2f}'.format(1e6*error)
+    # return '$\\pm$({0}'.format(err) + '$\\times 10^{-6})$'
+    err = '{:.0f}'.format(1e5*error)
+    return '({0})'.format(err)
+
 
 format_dict = {'SGA_ID':'%7d',
-               'RA':latex_ra, 
-               'DEC':latex_dec,
-               'Z_DESI':'{:.6f}', 
+               'RA':'{:.6f}', #latex_ra, 
+               'DEC':'{:.6f}', #latex_dec,
+               'Z_DESI':'{:.5f}', 
                'ZERR_DESI':latex_zerr,
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
                'R_MAG_SB26_ERR':latex_3err,
-               'V_0p33R26':'{:.2f}',
-               'V_0p33R26_err':latex_2err}
+               'V_0p33R26':'{:.1f}',
+               'V_0p33R26_ERR':latex_1err}
 #-------------------------------------------------------------------------------
 # Format table
 #-------------------------------------------------------------------------------

@@ -1,8 +1,78 @@
 import numpy as np
 
+from scipy.stats import binned_statistic
+
 import matplotlib.colors as mc
 
 import colorsys
+
+
+################################################################################
+#-------------------------------------------------------------------------------
+def profile_histogram(x, y, xbins, 
+                      yerr=None, 
+                      weights=None, 
+                      stat='mean', 
+                      weighted=False):
+    """
+    Compute a profile histogram from scattered data.
+    
+    Parameters
+    ----------
+    x : list or ndarray
+        Ordinates (independent variable).
+    y : list or ndarray
+        Coordinates (dependent variable).
+    xbins : list or ndarray
+        Bin edges for the independent variable.
+    yerr : list or ndarray
+        Uncertainties on the dependent variable. Assumed independent.
+    weights : list or ndarray
+        If not None (and weighted=True), will use this instead of yerr to weight 
+        the summary statistics.
+    stat : string
+        Statistic to compute in each bin.  Default is mean.
+    weighted : bool
+        Weight the summary statistics, either by the uncertainty in y or the 
+        provided weights.
+        
+    Returns
+    -------
+    N : ndarray
+        Unweighted counts per bin.
+    h : ndarray
+        Summary statistic (mean or median) of independent variable per bin.
+    e : ndarray
+        Uncertainty on the summary statistic per bin.
+    """
+    
+    N = binned_statistic(x, y, bins=xbins, statistic='count').statistic
+
+    if weighted:
+        if (yerr is None) and (weights is None):
+            raise ValueError('need to define either yerr or weights if using weighted fit.')
+
+        if weights is None:
+            # weight based on yerr
+            w = 1/yerr**2
+        else:
+            w = weights
+        W, H, E = binned_statistic(x, [w, w*y, w*y**2], 
+                                   bins=xbins, statistic='sum').statistic
+        h = H/W
+        e = 1/np.sqrt(W)
+    else:
+        mean, mean2 = binned_statistic(x, [y, y**2], 
+                                       bins=xbins, statistic='mean').statistic
+        h = mean
+        e = np.sqrt((mean2 - mean**2) / (N - 1))
+
+    if stat != 'mean':
+        h = binned_statistic(x, y, bins=xbins, statistic=stat).statistic
+    
+    return N, h, e
+################################################################################
+################################################################################
 
 
 

@@ -7,8 +7,10 @@ estimator (e.g., Tully-Fisher relation).
 # Import modules
 #-------------------------------------------------------------------------------
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 from astropy.table import Table
+from astropy.io import fits
 import astropy.constants as const
 import astropy.units as u
 ################################################################################
@@ -18,8 +20,7 @@ import astropy.units as u
 ################################################################################
 # Constants
 #-------------------------------------------------------------------------------
-h = 1
-H0 = 100*h*u.km/u.s/u.Mpc
+Om = 0.3151 # DESI fiducial cosmology
 
 c = const.c.to('km/s')
 
@@ -34,18 +35,150 @@ rng = np.random.default_rng()
 ################################################################################
 # Import catalog of galaxies for which to calculate the peculiar velocities
 #-------------------------------------------------------------------------------
-data_directory = 'SV/'
+# data_directory = 'SV/'
+data_directory = 'Y1/'
 
 # filename = 'SGA_fuji_ITFR_moduli.fits'
-filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
+# filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_z0p1_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf-fitH0_zCMB0p1_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_weightsVmax-1_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_AnthonyUpdates_weightsVmax-1_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_AnthonyUpdates_weightsVmax-1_dVsys_moduli.fits'
+# filename = 'SGA_iron_jointTFR-varyV0-perpdwarf_zCMB0p1_Anthony2_weightsVmax-1_dVsys_moduli.fits'
+# filename = 'SGA_iron_jointTFR-zbin0p005-R26dwarf_zCMB0p1_Anthony2_dVsys_moduli.fits'
+# filename = 'SGA_iron_jointTFR-zbin0p005-R26dwarf_zCMB0p1_Anthony2_weightsVmax-1_dVsys_moduli.fits'
+# filename = 'SGA_iron_jointTFR-zbin0p005-dwarfAlex_zCMB0p1_Anthony2_weightsVmax-1_dVsys_moduli.fits'
+filename = 'SGA_iron_jointTFR-zbin0p005-dwarfAlex_zCMB0p1_weightsVmax-1_dVsys_moduli.fits'
 
-galaxies = Table.read(data_directory + filename)
+hdul = fits.open(data_directory + filename)
+galaxies = Table(hdul[1].data)
+# galaxies = hdul[1].data
+# sig_TFR = hdul[0].header['SIG']
+hdr = hdul[0].header
+hdul.close()
+
+if 'H0' in hdr.keys():
+    H0 = hdr['H0']*u.km/u.s/u.Mpc
+else:
+    H0 = 100*u.km/u.s/u.Mpc
+
+if data_directory == 'SV/':
+    mu_colname = 'MU_TFbright'
+elif data_directory == 'Y1/':
+    mu_colname = 'MU_TF'
 ################################################################################
 
 
 
+################################################################################
+# Compute peculiar velocities per Carreres23 estimator
+#-------------------------------------------------------------------------------
+################################################################################
+
+
+
+################################################################################
+# Compute peculiar velocities per Watkins15 with deceleration parameter
+#-------------------------------------------------------------------------------
+def zmod(z, Om, Ol, j0=1):
+    '''
+    Compute the modified redshift, which accounts for non-linearity in the 
+    Hubble expansion
+    
+    Default values: j0 = 1 (LCDM jerk)
+    '''
+    q0 = 0.5*(Om - 2*Ol) # deceleration parameter
+    
+    return z*(1 + 0.5*(1 - q0)*z - (1./6.)*(1 - q0 - 3*q0**2 + j0)*z**2)
+
+def vpec(z_mod, mu, c=3e5, H0=100):
+    '''
+    Compute the peculiar velocity based on the approximation described by 
+    Watkins+ (2015)
+    
+    Default values: c = 3x10^5 km/s, H0 = 100 km/s/Mpc
+    '''
+    return (c*z_mod/(1 + z_mod))*(np.log(c*z_mod/(1e-5 * H0)) - 0.2*mu*np.log(10))
+
+
+# z_mod = zmod(galaxies['Z_DESI'], Om, 1 - Om) # Assuming flat LCDM
+z_mod = zmod(galaxies['Z_DESI_CMB'], Om, 1 - Om) # Assuming flat LCDM
+
+galaxies['V_PEC'] = vpec(z_mod, galaxies[mu_colname], c.value, H0.value)
+# v_pec = vpec(z_mod, galaxies[mu_colname], c.value, H0.value)
+#-------------------------------------------------------------------------------
+# Estimate uncertainty
+#-------------------------------------------------------------------------------
+galaxies['VERR_PEC'] = np.nan
+# verr_pec = np.nan*np.ones(len(galaxies))
+
+for i in range(len(galaxies)):
+    
+    # z_desi_random = rng.normal(galaxies['Z_DESI'][i], 
+    z_desi_random = rng.normal(galaxies['Z_DESI_CMB'][i], 
+                               galaxies['ZERR_DESI'][i], 
+                               size=N_samples)
+    mu_random = rng.normal(galaxies[mu_colname][i], 
+                           galaxies[mu_colname + '_ERR'][i], 
+                           size=N_samples)
+    
+    zmod_random = zmod(z_desi_random[z_desi_random > 0], Om, 1-Om)
+    
+    Vpec_random = vpec(zmod_random, 
+                       mu_random[z_desi_random > 0], 
+                       c.value, 
+                       H0.value)
+    
+    galaxies['VERR_PEC'][i] = np.nanstd(Vpec_random)
+    # verr_pec[i] = np.nanstd(Vpec_random)
+#-------------------------------------------------------------------------------
+# galaxies1 = rfn.append_fields(galaxies, 
+#                               ['V_PEC', 'VERR_PEC'], 
+#                               [v_pec, verr_pec], 
+#                               usemask=False)
+################################################################################
+
+
+"""
+################################################################################
+# Compute peculiar velocities per Springob07
+#
+# v_pec = cz(1 - 10^(0.2mu)) <-- WRONG!  DO NOT USE
+#-------------------------------------------------------------------------------
+galaxies['V_PEC'] = c*galaxies['Z_DESI']*(1 - 10**(0.2*galaxies[mu_colname]))
+#-------------------------------------------------------------------------------
+# Estimate uncertainty
+#-------------------------------------------------------------------------------
+galaxies['VERR_PEC'] = np.nan
+
+for i in range(len(galaxies)):
+    
+    z_desi_random = rng.normal(galaxies['Z_DESI'][i], 
+                               galaxies['ZERR_DESI'][i], 
+                               size=N_samples)
+    mu_random = rng.normal(galaxies[mu_colname][i], 
+                           galaxies[mu_colname + '_err'][i], 
+                           size=N_samples)
+    
+    Vpec_random = c*z_desi_random*(1 - 10**(0.2*mu_random))
+    
+    galaxies['VERR_PEC'][i] = np.nanstd(Vpec_random.data)
+    
+# galaxies['VERR_PEC'] = np.sqrt(galaxies[mu_colname + '_err']**2 + sig_TFR**2)
+################################################################################
+"""
+
+"""
 ################################################################################
 # Compute peculiar velocities
+#
+# NOTE: This method uses the low-z approximation, which has been shown to 
+# underestimate the PVs by as much as 600 km/s at z = 0.1 
+# (see Davis + Scrimgeour, 2014, for details).
 #-------------------------------------------------------------------------------
 def dist(mu):
     '''
@@ -66,8 +199,7 @@ def dist(mu):
     d = 10 * 10**(0.2*mu) # pc or pc/h
     return d/1e6 # Mpc or Mpc/h
 
-
-gal_d = dist(galaxies['mu_TFbright']) # Mpc/h
+gal_d = dist(galaxies[mu_colname]) # Mpc/h or Mpc
 
 galaxies['V_PEC'] = c*galaxies['Z_DESI'] - H0*(gal_d*u.Mpc) # km/s
 #-------------------------------------------------------------------------------
@@ -80,8 +212,8 @@ for i in range(len(galaxies)):
     z_desi_random = rng.normal(galaxies['Z_DESI'][i], 
                                galaxies['ZERR_DESI'][i], 
                                size=N_samples)
-    mu_random = rng.normal(galaxies['mu_TFbright'][i], 
-                           galaxies['mu_TFbright_err'][i], 
+    mu_random = rng.normal(galaxies[mu_colname][i], 
+                           galaxies[mu_colname + '_err'][i], 
                            size=N_samples)
     
     d_random = dist(mu_random)
@@ -91,7 +223,7 @@ for i in range(len(galaxies)):
     galaxies['VERR_PEC'][i] = np.nanstd(Vpec_random.data)
 #-------------------------------------------------------------------------------
 ################################################################################
-
+"""
 
 """
 ################################################################################
@@ -200,7 +332,13 @@ galaxies['VERR_PEC'] = c*galaxies['ZERR_PEC']
 ################################################################################
 # Save file
 #-------------------------------------------------------------------------------
-updated_filename = filename[:-5] + '_pec.fits'
+updated_filename = filename[:-5] + '_pec-Watkins15.fits'
 
-galaxies.write(data_directory + updated_filename, format='fits', overwrite=True)
+empty_primary = fits.PrimaryHDU(header=hdr)
+table_hdu = fits.BinTableHDU(data=galaxies)
+hdul = fits.HDUList([empty_primary, table_hdu])
+
+# galaxies.write(data_directory + updated_filename, format='fits', overwrite=True)
+hdul.writeto(data_directory + updated_filename, overwrite=True)
+# hdul.close()
 ################################################################################
