@@ -32,8 +32,8 @@ import corner
 import pickle
 
 import sys
-sys.path.insert(1, '/global/u1/k/kadglass/DESI_SGA/TF/')
-# #sys.path.insert(1, '/Users/kellydouglass/Documents/Research/DESI/Targets/code/TF/')
+# sys.path.insert(1, '/global/u1/k/kadglass/DESI_SGA/TF/')
+sys.path.insert(1, '/Users/kdouglass/Documents/Research/DESI/PV_Survey/DESI_SGA/TF/')
 from help_functions import adjust_lightness
 # from line_fits import param_invert, hyperfit_line
 from TF_photoCorrect import BASS_corr, MW_dust, k_corr, internal_dust
@@ -358,7 +358,10 @@ for sga_gal in np.unique(centers_inComa['SGA_ID']):
     if cosi2 < 0:
         cosi2 = 0
     
-    axis_inComa['V_ROT'][obs_idx] /= np.sin(np.arccos(np.sqrt(cosi2)))
+    sini = np.sin(np.arccos(np.sqrt(cosi2)))
+
+    axis_inComa['V_ROT'][obs_idx] /= sini
+    axis_inComa['V_ROT_ERR'][obs_idx] /= sini
     #---------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
