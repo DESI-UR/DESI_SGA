@@ -518,7 +518,7 @@ ax2.plot(xvals, yvals[0] + sig_fit[0], "k--", lw=1.3)
 # Uncertainty ellipses for Coma galaxies
 for i, e in enumerate(ells1):
     ax2.add_artist(e)
-    e.set_color(adjust_lightness('tab:blue', amount=1.75))
+    e.set_color(adjust_lightness('tab:orange', amount=1.5))
 '''
 # Uncertainty ellipses for dwarf Coma galaxies
 for i, e in enumerate(ells_dwarfs):
@@ -526,7 +526,8 @@ for i, e in enumerate(ells_dwarfs):
     e.set_color(adjust_lightness('gray', amount=1.75))
 '''
 # Coma galaxies
-ax2.plot(data1[0], data1[1], 'x', label='Coma ({} galaxies)'.format(len(data1[0])))
+ax2.plot(data1[0], data1[1], 'x', c='tab:orange', 
+         label='Coma ({} galaxies)'.format(len(data1[0])))
 '''
 # Dwarf galaxies in Coma
 ax2.plot(data_dwarfs[0], data_dwarfs[1], 'x', c='gray')
@@ -553,9 +554,9 @@ ax1.plot(xvals, yvals[1], 'k', lw=1.3)
 
 for i, e in enumerate(ells2):
     ax1.add_artist(e)
-    e.set_facecolor(adjust_lightness('tab:orange', amount=1.25))
+    e.set_facecolor(adjust_lightness('tab:red', amount=1.5))
     
-ax1.plot(data2[0], data2[1], 'x', c='tab:orange', 
+ax1.plot(data2[0], data2[1], 'x', c='tab:red', 
          label='0-pt ({} galaxies)'.format(len(data2[0])))
 
 ax1.set_ylabel(r'$M_r^{0.05} (26) - 5\log h$', fontsize=14)

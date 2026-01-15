@@ -22,10 +22,12 @@ import numpy as np
 # Galaxy data file name
 # data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli.fits'
 # data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_moduli.fits'
-data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
+# data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli.fits'
+data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_corr_moduli-20260114.fits'
 
 # Output LaTeX file name
-latex_filename = 'fuji_Coma_cal_galaxies_20250620.tex'
+# latex_filename = 'fuji_Coma_cal_galaxies_20250620.tex'
+latex_filename = 'fuji_Coma_cal_galaxies_20260115.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -73,7 +75,8 @@ for i in range(len(data_table)):
 ################################################################################
 # Galaxies to include
 #-------------------------------------------------------------------------------
-SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration-20250523.txt', 
+# SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration-20250523.txt', 
+SGAIDs_cal = Table.read('fuji_Coma_SGAids_calibration-20260114.txt', 
                         format='ascii.commented_header')
 
 cal_boolean = np.zeros(len(data_table), dtype=bool)
@@ -120,15 +123,15 @@ def latex_dec(angle):
 
 def latex_1err(error):
     err = '{:.1f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_2err(error):
     err = '{:.2f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_3err(error):
     err = '{:.3f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_zerr(error):
     # err = '{:.2f}'.format(1e6*error)

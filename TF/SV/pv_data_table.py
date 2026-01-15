@@ -21,11 +21,12 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data file name
-# data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec-Watkins15.fits'
-data_filename = 'SV/SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli_pec-Watkins15.fits'
+# data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf_moduli_pec-Watkins15.fits'
+# data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_moduli_pec-Watkins15.fits'
+data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_corr_moduli-20260114_pec-Watkins15.fits'
 
 # Output data file name
-out_filename = 'SV/fuji_TF_pv.fits'
+out_filename = 'fuji_TF_pv.fits'
 
 # Columns to include in data table
 col_names = ['SGA_ID', 

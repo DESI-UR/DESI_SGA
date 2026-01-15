@@ -21,10 +21,12 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data file name
-data_filename = 'SGA_distances_0pt_fuji_dVsys.fits'
+# data_filename = 'SGA_distances_0pt_fuji_dVsys.fits'
+data_filename = 'SGA_distances_0pt_fuji_dVsys_corr.fits'
 
 # Output LaTeX file name
-latex_filename = 'fuji_SNe_cal_galaxies.tex'
+# latex_filename = 'fuji_SNe_cal_galaxies.tex'
+latex_filename = 'fuji_SNe_cal_galaxies-20260115.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -42,7 +44,7 @@ err_dict = {'Z_DESI':'ZERR_DESI',
             'DM1_SN':'e_DM1_SN'}
 
 # Column header for table
-colhead = '\\tablehead{\\colhead{SGA-2020 ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.33R_{26})$} & \\colhead{$\mu$} & \\colhead{SN} \\\[-0.5em] & [\text{deg}] & [\text{deg}] &  & \\colhead{[arcmin]} & [\\text{AB mag}] & \\colhead{[\\text{km/s}]} & [\\text{mag}] & }'
+colhead = '\\tablehead{\\colhead{SGA-2020 ID} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.33R_{26})$} & \\colhead{$\mu$} & \\colhead{SN} \\\[-0.5em] & \\colhead{[deg]} & \\colhead{[deg]} &  & \\colhead{[arcmin]} & \\colhead{[AB mag]} & \\colhead{[km/s]} & \\colhead{[mag]} & }'
 
 # Table foot (caption, footnotes)
 tabfoot = '\\tablecomments{{List} of the two galaxies used for calibrating the zero-point of the TFR.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ isophote in the $r$-band are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI EDR spectra, and rotational velocities at $0.33R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are from \\cite{Stahl2021}.}'
@@ -122,15 +124,15 @@ def latex_dec(angle):
 
 def latex_1err(error):
     err = '{:.1f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
     
 def latex_2err(error):
     err = '{:.2f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_3err(error):
     err = '{:.3f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_zerr(error):
     # err = '{:.2f}'.format(1e6*error)
