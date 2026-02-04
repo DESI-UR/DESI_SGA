@@ -26,18 +26,20 @@ import numpy as np
 data_filename = 'SGA_fuji_jointTFR-varyV0-perpdwarf-zCMB_dVsys_corr_moduli-20260114_pec-Watkins15.fits'
 
 # Output data file name
-out_filename = 'fuji_TF_pv.fits'
+# out_filename = 'fuji_TF_pv.fits'
+out_filename = 'fuji_TF_pv-sig_figs.fits'
 
 # Columns to include in data table
-col_names = ['SGA_ID', 
-             'RA', 
-             'DEC', 
-             'Z_DESI', 
-             'D26', 
-             'R_MAG_SB26', 
-             'V_0p33R26', 
-             'MU_TFbright', 
-             'V_PEC']
+# Also include the number of significant digits to be used for the column
+col_names = {'SGA_ID':0, 
+             'RA':6, 
+             'DEC':6, 
+             'Z_DESI':6, 
+             'D26':2, 
+             'R_MAG_SB26':3, 
+             'V_0p33R26':1, 
+             'MU_TFbright':2, 
+             'V_PEC':-2}
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
             'V_0p33R26':'V_0p33R26_ERR', 
@@ -62,21 +64,33 @@ hdul.close()
 
 
 
+
 ################################################################################
 # Build output table
 #-------------------------------------------------------------------------------
 out_table = Table()
 
-for name in col_names:
+for name in col_names.keys():
     out_table[name] = data_table[name]
     
     if name in err_dict.keys():
         out_table[err_dict[name]] = data_table[err_dict[name]]
 
+        # Round column to same decimal than used for the parent column
+        out_table.round({err_dict[name]:col_names[name]})
+
+# Round table values to specified sig. figs, as requested by the ApJ data 
+# editor
+out_table.round(col_names)
+
+# out_table[:5].pprint()
+# exit()
+
 # Rename columns
 out_table['MU_TFbright'].name = 'MU_TF'
 out_table['MU_TFbright_ERR'].name = 'MU_TF_ERR'
 ################################################################################
+
 
 
 
