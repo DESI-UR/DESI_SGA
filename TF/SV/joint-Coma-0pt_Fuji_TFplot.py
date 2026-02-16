@@ -330,7 +330,7 @@ SGA_0pt['R_ABSMAG_SB26_ERR'] = np.sqrt(SGA_0pt['R_MAG_SB26_ERR_CORR']**2 + SGA_0
 hdr = fits.Header()
 
 hdr['DESI_DR'] = 'EDR'
-hdr['FIGURE'] = 7
+hdr['FIGURE'] = 8
 
 empty_primary = fits.PrimaryHDU(header=hdr)
 #-------------------------------------------------------------------------------
@@ -352,21 +352,21 @@ zpt_hdu.columns['V_0p33R26_ERR'].name = 'VROT_ERR'
 
 hdul = fits.HDUList([empty_primary, coma_hdu, zpt_hdu])
 
-hdul.writeto('paper_figures/Fig7/fig7_data-rev1.fits', overwrite=True)
+hdul.writeto('paper_figures/Fig8/fig8_data.fits', overwrite=True)
 #-------------------------------------------------------------------------------
 # Header
 #-------------------------------------------------------------------------------
 hdr2 = fits.Header()
 
 hdr2['DESI_DR'] = 'EDR'
-hdr2['FIGURE'] = 8
+hdr2['FIGURE'] = 9
 hdr2['LOG_V0'] = float(f'{V0:.3f}')
 #-------------------------------------------------------------------------------
 # Data
 #-------------------------------------------------------------------------------
 mcmcfit_hdu = fits.PrimaryHDU(header=hdr2, data=tfr_samples)
 
-mcmcfit_hdu.writeto('paper_figures/Fig8/fig8_data-rev1.fits', overwrite=True)
+mcmcfit_hdu.writeto('paper_figures/Fig9/fig9_data.fits', overwrite=True)
 ################################################################################
 # exit()
 
