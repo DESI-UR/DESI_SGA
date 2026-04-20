@@ -43,7 +43,7 @@ def BASS_corr(photsys):
     
     bass_gal = photsys == 'N'
     
-    corr[bass_gal] += 0.0234
+    corr[bass_gal] -= 0.0234
     corr_err[bass_gal] += 0.02
     
     return corr, corr_err
