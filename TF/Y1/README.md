@@ -9,17 +9,18 @@ This directory contains the code used to calibrate the DESI Y1 TFR with observat
     * Output: `SGA-2020_iron_Vrot_dVsys_VI_photsys_v2.fits`
         * Center observations have been cleaned (`DELTACHI2` > 25, `ZWARN` = 0)
         * Rotational velocities at 0.4$R_{26}$ satisfy 10 < $V$ < 1000 km/s and $\Delta V/V_{min} \leq 5$
+        * Rotational velocities at 0.4$R_{26}$ have the same sign on the same side of the galaxy, and opposite signs on opposite sides
         * Any galaxy which has been removed due to VI is also not included
         * 7 km/s statistical uncertainty added to all reported Redrock uncertainties
 
 2. `TF_iron_internal-dustCorr.ipynb` - This notebook fits for the correlation between the observed apparent magnitude and the axis ratio of the galaxies in the Iron sample to correct for internal dust extinction.
     * Input: `SGA-2020_iron_Vrot_dVsys_VI_photsys_v2.fits` (produced from `iron_rot_vel.ipynb`)
-    * Output: `iron_internalDust_z0p1_mcmc.pickle` (contains MCMC samples and median $m_r$ from linear fit to $m_r$ v. $b/a$)
+    * Output: `iron_internalDust_z0p1_mcmc-20260426.pickle` (contains MCMC samples and median $m_r$ from linear fit to $m_r$ v. $b/a$)
 
-3. `TF_Y1_zbin_calibration_weightsVmax-1_KAD.ipynb` - This notebook calibrates the Tully Fisher relation using redshift bins 
+3. `TF_Y1_zbin_calibration_weightsVmax-1_cutsAlex_KAD.ipynb` - This notebook calibrates the Tully Fisher relation using redshift bins 
     * Inputs:
         * `SGA-2020_iron_Vrot_dVsys_VI_photsys_v2.fits` (produced from `iron_rot_vel.ipynb`)
-        * `iron_internalDust_z0p1_mcmc.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `iron_internalDust_z0p1_mcmc-20260424.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
         * `TFY1_Classification.csv` (contains morphology classifications from SSL binary classifiers)
     * Output: `cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_*.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
 
