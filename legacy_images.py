@@ -1,7 +1,7 @@
 import os
 import requests
 
-def get_cutout(targetid, ra, dec, verbose=False):
+def get_cutout(targetid, ra, dec, dr=9, verbose=False):
     '''
     Extracts postage-stamp image from the Legacy Surveys viewer
 
@@ -10,12 +10,16 @@ def get_cutout(targetid, ra, dec, verbose=False):
     ==========
 
     targetid : 
+        galaxy identifier
 
     ra : float
         Right ascension of target center [degrees]
 
     dec : float
         Declination of target center [degrees]
+
+    dr : int
+        Legacy Surveys data release to use.  Default is 9.
 
     verbose : boolean
         Determines whether or not to print status statements.  Default is False 
@@ -32,7 +36,7 @@ def get_cutout(targetid, ra, dec, verbose=False):
     ############################################################################
     # Initialize returned image file name
     #---------------------------------------------------------------------------
-    img_name = 'Figures/{}.jpg'.format(targetid)
+    img_name = 'Figures/{}-dr{}.jpg'.format(targetid, dr)
     ############################################################################
 
 
@@ -47,7 +51,7 @@ def get_cutout(targetid, ra, dec, verbose=False):
         if verbose:
             print('Accessing {}'.format(img_name))
 
-        img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix=0.25&layer=ls-dr9&size=1000'.format(ra, dec)
+        img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix=0.25&layer=ls-dr{}&size=1000'.format(ra, dec, dr)
         print(img_url)
 
         with open(img_name, 'wb') as handle:
