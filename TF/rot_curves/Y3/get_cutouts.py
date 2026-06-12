@@ -48,7 +48,7 @@ def get_cutout(sgaid, ra, dec, size, dr = 11, dir = '', verbose=False):
         if verbose:
             print('{} exists.'.format(img_name))
     else:
-        img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer={}&size={}&sga'.format(ra, dec, pix_scale, layer, size)
+        img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer={}&size={}&zoom=14&sga'.format(ra, dec, pix_scale, layer, size)
         if verbose:
             print('Get {}'.format(img_url))
             
