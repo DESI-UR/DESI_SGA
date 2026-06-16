@@ -67,8 +67,6 @@ This directory contains the code used to calibrate the DESI Y1 TFR with observat
 
 `TF_redshift_trends.ipynb` - This notebook looks at $eta$ v. $z$ for different subsets of the TF catalog.
 
-`TF_Y1_sample_stats.ipynb` - Compares the properties of the calibration sample with the full DR1 TF catalog.
-
 `TF_Y1_targets.ipynb` - This notebook is a preliminary glance at the statistics of the Iron sample.
 
 `TF_Y1_VI-John_compare.ipynb` - How do John's VI results compare with the SSL morphology classification?
