@@ -98,7 +98,7 @@ def param_invert(w0, w1, cov):
 ################################################################################
 # Fitting using hyperfit
 #-------------------------------------------------------------------------------
-def hyperfit_line(x, y, dx, dy, bounds):
+def hyperfit_line(x, y, dx, dy, bounds, weights=None):
     '''
     Fit a line, y = ax + b, to the data, using the hyperfit package.  This 
     accepts uncertainties in both x and y.
@@ -118,6 +118,11 @@ def hyperfit_line(x, y, dx, dy, bounds):
           1. (slope minimum, slope maximum)
           2. (y-intercept minimum, y-intercept maximum)
           3. (scatter minimum, scatter maximum)
+
+    weights : None or ndarray of shape (N,)
+        weight for each galaxy.  If None, weights will be set to 1.
+
+        Note that len(weights) == len(x)
 
 
     RETURNS
@@ -150,9 +155,9 @@ def hyperfit_line(x, y, dx, dy, bounds):
 
 
     ############################################################################
-    # Create the hacked hyperfit object
+    # Create the hyperfit object
     #---------------------------------------------------------------------------
-    hf = MultiLinFit([x, y], cov)
+    hf = LinFit([x, y], cov, weights=weights)
     ############################################################################
 
 
