@@ -69,6 +69,8 @@ This directory contains the code used to calibrate the DESI Y1 TFR with observat
 
 `TF_Y1_morph_stats.ipynb` - What are the properties of the TF catalog in each of the different SSL morphological classes?
 
+`TF_Y1_scatter.ipynb` - Does the scatter above and to the left of the TFR reduce if inclination angles are over-estimated?
+
 `TF_Y1_targets.ipynb` - This notebook is a preliminary glance at the statistics of the Iron sample.
 
 `TF_Y1_v15_stats.ipynb` - General properties of the TF catalog.
