@@ -9,7 +9,7 @@ This is a collection of the various methods of fitting a line to data.
 import numpy as np
 
 from hyperfit.linfit import LinFit
-from hyperfit_v2 import MultiLinFit
+from hyperfit_v3 import MultiLinFit
 
 from scipy.optimize import minimize
 ################################################################################
