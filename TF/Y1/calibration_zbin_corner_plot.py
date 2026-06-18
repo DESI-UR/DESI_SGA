@@ -79,14 +79,30 @@ corner(tfr_mcmc_samples.T,#[mask].T,
        show_titles=True,
        title_fmt='.3f', 
        title_kwargs={"fontsize": 18, 'loc':'left', 'pad':10}, 
+       fig=fig
        );
+
+# Add a table of the best-fit parameters to the upper right corner
+ax_table = fig.add_axes([0.55, 0.65, 0.35, 0.25])
+ax_table.axis('off')
+
+table_text = []
+for i in range(len(labels)):
+    table_text.append([f'{values[i]:.2f} $\pm$ {sigmas[i]:.3f}'])
+
+param_table = ax_table.table(cellText=table_text, 
+                             rowLabels=labels, 
+                             loc='center', 
+                             cellLoc='center', 
+                             fontsize=48)
+param_table.scale(0.35, 6)
 
 for ax in fig.get_axes():
     ax.tick_params(axis='both', which='major', labelsize=16)
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v13alt.png', 
+plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v13alt_table.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
