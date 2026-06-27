@@ -9,7 +9,7 @@ This is a collection of the various methods of fitting a line to data.
 import numpy as np
 
 from hyperfit.linfit import LinFit
-from hyperfit_v3 import MultiLinFit
+# from hyperfit_v3 import MultiLinFit
 
 from scipy.optimize import minimize
 ################################################################################
@@ -186,7 +186,7 @@ def hyperfit_line(x, y, dx, dy, bounds, weights=None):
 ################################################################################
 # Fitting using the subclassed version of hyperfit (for multiple data sets)
 #-------------------------------------------------------------------------------
-def hyperfit_line_multi(x, y, dx, dy, bounds, weights=None, scatter=None):
+def hyperfit_line_multi(x, y, dx, dy, bounds, weights=None, scatter=None, version=None):
     '''
     Fit a line, y = ax + b, to the data, using a hacked version of the hyperfit 
     package.  This accepts uncertainties in both x and y.
@@ -224,6 +224,10 @@ def hyperfit_line_multi(x, y, dx, dy, bounds, weights=None, scatter=None):
         the latter, then no scatter parameter will be used if the last data set 
         contains less than three objects.
 
+    version : None or integer
+        Determines which version of the subclassed Hyperfit to import.  If none, 
+        imports the latest verison (v3); otherwise, imports version "vversion".
+
 
     RETURNS
     =======
@@ -242,6 +246,16 @@ def hyperfit_line_multi(x, y, dx, dy, bounds, weights=None, scatter=None):
 
     hf : hyperfit object
     '''
+
+    if version is None:
+        from hyperfit_v3 import MultiLinFit
+    elif version == 3:
+        from hyperfit_v3 import MultiLinFit
+    elif version == 2:
+        from hyperfit_v2 import MultiLinFit
+    else:
+        print('Unknown version of Hyperfit.')
+        raise ImportError
     
     M = len(x) # Number of data sets
 
