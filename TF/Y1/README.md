@@ -83,11 +83,63 @@ This directory contains the code used to calibrate the DESI Y1 TFR with observat
 
 `iron_rot_vel_alex.ipynb` - This notebook replicates Alex's method of calculating rotational velocities (assuming all observed redshifts are drawn from a PDF)
 
-`TF_Y1_calibration_v15-KAD.ipynb` - This notebook is an alternate of `TF_Y1_zbin_calibration_weightsVmax-1_cutsAlex_KAD.ipynb`, corresponding to the v15-catalog calibration.
-
 `TF_Y1_cluster_calibration_KAD-Stahl010pt.ipynb` - This notebook is a copy of `TF_Y1_cluster_calibration_KAD.ipynb` described above (step #3), but calibrates the 0-pt with those Iron galaxies with distance moduli from Stahl01's SNIa calibration.
 
 `TF_Y1_clustering.ipynb` - This notebook looks at using a k-means clustering algorithm to define the main TF sample.
+
+### v16
+
+`TF_Y1_calibration_v16-KAD.ipynb` - This notebook is an alternate of `TF_Y1_zbin_calibration_weightsVmax-1_cutsAlex_KAD.ipynb`, corresponding to the v16-catalog calibration (correctly applying the K-corrections).
+    * Inputs:
+        * `SGA-2020_iron_Vrot_VI_corr-20251030.fits` (produced from `iron_rot_vel.ipynb`)
+        * `iron_internalDust_z0p1_mcmc-20260424.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `TFY1_Classification.csv` (contains morphology classifications from SSL binary classifiers)
+        * `VI_JohnLucey/REJECTS.txt` (contains list of objects VI'd to not be used for TFR)
+        * `desi_dust_gr_512.fits` (MW dust map)
+    * Output: `cov_ab_iron_v16_20260424.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+
+`TF_iron_jointTFR-v16.ipynb` - This notebook is an alternate of `TF_iron-jointTFR-dwarfAlex-zbin0p005-weightsVmax-1.ipynb`, corresponding to the v16-catalog calibration.
+    * Inputs:
+        * `SGA-2020_iron_Vrot_VI_corr-20251030.fits` (produced from `iron_rot_vel.ipynb`)
+        * `iron_internalDust_z0p1_mcmc_09092025.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `cov_ab_iron_v16_20260424.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+    * Output: `SGA_iron_jointTFR_v16_moduli.fits` (header contains calibrated TFR values)
+
+### v17
+
+`TF_Y1_calibration_v17-KAD.ipynb` - This notebook is an alternate of `TF_Y1_zbin_calibration_weightsVmax-1_cutsAlex_KAD.ipynb`, corresponding to the v17-catalog calibration (using the fixed weighting in Hyperfit).
+    * Inputs:
+        * `SGA-2020_iron_Vrot_VI_corr-20251030.fits` (produced from `iron_rot_vel.ipynb`)
+        * `iron_internalDust_z0p1_mcmc-20260424.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `TFY1_Classification.csv` (contains morphology classifications from SSL binary classifiers)
+        * `VI_JohnLucey/REJECTS.txt` (contains list of objects VI'd to not be used for TFR)
+        * `desi_dust_gr_512.fits` (MW dust map)
+    * Output: `cov_ab_iron_v17_20260623.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+
+`TF_iron_jointTFR-v17.ipynb` - This notebook is an alternate of `TF_iron-jointTFR-dwarfAlex-zbin0p005-weightsVmax-1.ipynb`, corresponding to the v16-catalog calibration.
+    * Inputs:
+        * `SGA-2020_iron_Vrot_VI_corr-20251030.fits` (produced from `iron_rot_vel.ipynb`)
+        * `iron_internalDust_z0p1_mcmc_09092025.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `cov_ab_iron_v17_20260623.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+    * Output: `SGA_iron_jointTFR_v17_moduli.fits` (header contains calibrated TFR values)
+    
+### v17 alt
+
+`TF_Y1_calibration_v17alt-KAD.ipynb` - This notebook is an alternate of `TF_Y1_zbin_calibration_weightsVmax-1_cutsAlex_KAD.ipynb`, corresponding to the v16-catalog calibration (adjusting $V_{max}$ with $1 + z$ factor).
+    * Inputs:
+        * `SGA-2020_iron_Vrot_VI_corr-20251030.fits` (produced from `iron_rot_vel.ipynb`)
+        * `iron_internalDust_z0p1_mcmc-20260424.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `TFY1_Classification.csv` (contains morphology classifications from SSL binary classifiers)
+        * `VI_JohnLucey/REJECTS.txt` (contains list of objects VI'd to not be used for TFR)
+        * `desi_dust_gr_512.fits` (MW dust map)
+    * Output: `cov_ab_iron_v17alt_20260627.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+
+`TF_iron_jointTFR-v17alt.ipynb` - This notebook is an alternate of `TF_iron-jointTFR-dwarfAlex-zbin0p005-weightsVmax-1.ipynb`, corresponding to the v17alt-catalog calibration.
+    * Inputs:
+        * `SGA-2020_iron_Vrot_VI_corr-20251030.fits` (produced from `iron_rot_vel.ipynb`)
+        * `iron_internalDust_z0p1_mcmc_09092025.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
+        * `cov_ab_iron_v17alt_20260627.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+    * Output: `SGA_iron_jointTFR_v17alt_moduli.fits` (header contains calibrated TFR values)
 
 ## Comparison with other catalogs
 
@@ -98,3 +150,4 @@ This directory contains the code used to calibrate the DESI Y1 TFR with observat
 `catalog_trends.ipynb` and `Y1_calibration_comparison.ipynb` - Compares different catalogs.
 
 `FitResults-Copy1.ipynb` - This notebook compares Alex's TF calibration with ours.
+
