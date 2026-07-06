@@ -20,7 +20,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 
+temp_infile = open(#'cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 
+                   'cov_ab_iron_jointTFR_v14.pickle',
                    'rb')
 cov_tfr, tfr_mcmc_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
@@ -28,7 +29,7 @@ temp_infile.close()
 # Number of redshift bins
 m = len(zbins) - 1
 # m = len(zbins) - 2
-# NOTE: m should really be just len(zbins)-1, but we calibrated v13,v14 catalogs 
+# NOTE: m should really be just len(zbins)-1, but we calibrated the v13 catalog 
 # with an extra redshift bin (0.01-0.015) that we want to not show in the paper.
 
 # Create a boolean index array to mask the redshift bin we don't want to show
@@ -82,13 +83,15 @@ corner(tfr_mcmc_samples.T,#[mask].T,
        fig=fig
        );
 
+#-------------------------------------------------------------------------------
 # Add a table of the best-fit parameters to the upper right corner
+#-------------------------------------------------------------------------------
 ax_table = fig.add_axes([0.55, 0.65, 0.35, 0.25])
 ax_table.axis('off')
 
 table_text = []
 for i in range(len(labels)):
-    table_text.append([f'{values[i]:.2f} $\pm$ {sigmas[i]:.3f}'])
+    table_text.append([f'${values[i]:.3f} \pm {sigmas[i]:.3f}$'])
 
 param_table = ax_table.table(cellText=table_text, 
                              rowLabels=labels, 
@@ -96,13 +99,27 @@ param_table = ax_table.table(cellText=table_text,
                              cellLoc='center', 
                              fontsize=48)
 param_table.scale(0.35, 6)
+#-------------------------------------------------------------------------------
 
 for ax in fig.get_axes():
     ax.tick_params(axis='both', which='major', labelsize=16)
 
-# plt.show()
+plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v13alt_table.png', 
-            dpi=150, 
-            facecolor='none')
+# plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v13alt_table.png', 
+#             dpi=150, 
+#             facecolor='none')
 ################################################################################
+
+
+
+################################################################################
+# Save figure data for paper
+#-------------------------------------------------------------------------------
+temp_infile = open('paper_figures/Fig7/fig7_data.pickle', 'wb')
+
+pickle.dump(tfr_mcmc_samples, temp_infile)
+
+temp_infile.close()
+################################################################################
+
