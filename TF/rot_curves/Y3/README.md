@@ -3,6 +3,7 @@
 1. `rot_curve_targets_loa.ipynb` - Gets the distances between center observation and all other fibers. It files for galaxies that have at least three fibers, and a center observation or two symmetric points.
   * Inputs
     * `desi_pv_loa_healpix.fits`
+    * `desi_pv_fuji_healpix.fits`
     * `SGA-2020.fits` (`ELLIPSE`)
   * Output: `loa_targs.fits`
     * Galaxies that pass criteria selection are marked with a 1 in `Selection` column
@@ -29,6 +30,8 @@
      * `loa_targs_edited.fits` (produced from `Filing_bad_fibers.ipynb`)
      * `SGA-2020.fits` (`ELLIPSE`)
      * `get_cutouts.py` (Note: use the same directory that you have previously generated the cutouts from in `cutouts_loa.ipynb`)
+     * `galaxy_selection.py`
+     * `velocity_map_fxns.py`
   * Outputs
     * `loa_rot_velocity.fits`
       * `ZERR_MOD` corrects for redrock 7km/s systematic uncertainty
