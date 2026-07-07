@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 # Custom functions
 import sys
-sys.path.insert(1, '/Users/kdouglass/Documents/Research/DESI/PV_survey/code/TF/')
+sys.path.insert(1, '/Users/kdouglass/Documents/Research/DESI/PV_survey/DESI_SGA/TF/')
 from help_functions import profile_histogram
 ################################################################################
 
@@ -28,10 +28,13 @@ from help_functions import profile_histogram
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
-SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v14.fits')
+SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
+
+SGA_TF_latest = Table.read('SGA_iron_jointTFR_moduli-v18_20260706.fits')
 
 # Plot those in the main cosmology sample differently
 sample1 = SGA_TF['MAIN']
+sample1_latest = SGA_TF_latest['MAIN']
 ################################################################################
 
 
@@ -61,15 +64,7 @@ _zbins = np.arange(0, 0.105, 0.005)
 dz = 0.5*np.diff(_zbins)
 zc = 0.5*(_zbins[1:] + _zbins[:-1])
 
-# N, y_avg, y_std = profile_histogram(SGA_TF['Z_DESI_CMB'], 
-#                                     SGA_TF['LOGDIST'], 
-#                                     _zbins, 
-#                                     weights=SGA_TF['LOGDIST_ERR']**-2, 
-#                                     weighted=True)
-# plt.errorbar(zc, y_avg, xerr=dz, yerr=y_std, fmt='x', 
-#              color='darkgray', 
-#              label='weighted mean')
-
+# Cosmology sample
 N, y_avg, y_std = profile_histogram(SGA_TF['Z_DESI_CMB'][sample1], 
                                     SGA_TF['LOGDIST'][sample1], 
                                     _zbins, 
@@ -77,7 +72,19 @@ N, y_avg, y_std = profile_histogram(SGA_TF['Z_DESI_CMB'][sample1],
                                     weighted=True)
 plt.errorbar(zc, y_avg, xerr=dz, yerr=y_std, fmt='x', 
              color='darkblue', 
-             label='weighted mean')
+             label='Original')
+
+# Latest catalog
+N, y_avg, y_std = profile_histogram(SGA_TF_latest['Z_DESI_CMB'][sample1_latest], 
+                                    SGA_TF_latest['LOGDIST'][sample1_latest], 
+                                    _zbins, 
+                                    weights=SGA_TF_latest['LOGDIST_ERR'][sample1_latest]**-2, 
+                                    weighted=True)
+plt.errorbar(zc, y_avg, xerr=dz, yerr=y_std, fmt='x', 
+             color='mediumseagreen', 
+             label='Updated')
+
+plt.legend()
 #-------------------------------------------------------------------------------
 
 
@@ -137,9 +144,9 @@ plt.ylim((-0.05, 0.05))
 # plt.ylim((-0.13, 0.13))
 plt.xlim((0, 0.105))
 
-plt.show()
+# plt.show()
 
-# plt.savefig('../../../figures/Y1_papers/iron_logdist-v-z_bins_v14.png', 
-#             dpi=150, 
-#             facecolor='none')
+plt.savefig('../../../figures/Y1_papers/iron_logdist-v-z_bins_v13-v18.png', 
+            dpi=150, 
+            facecolor='none')
 ################################################################################

@@ -70,7 +70,7 @@ plt.hist(SGA_TF['LOGDIST_ERR'][sample1],
 plt.hist(SGA_TF['LOGDIST_ERR'][~sample1], 
          bins=sigma_bins, 
          color='darkgray', 
-         label='Dwarfs')
+         label='Dwarfs & Outliers')
 plt.hist(SGA_TF['LOGDIST_ERR'][sample1], 
          bins=sigma_bins, 
          histtype='step',

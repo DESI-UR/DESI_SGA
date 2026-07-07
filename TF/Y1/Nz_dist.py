@@ -43,7 +43,7 @@ plt.hist(SGA_TF['Z_DESI_CMB'][sample1],
 plt.hist(SGA_TF['Z_DESI_CMB'][~sample1], 
          bins=z_bins, 
          color='darkgray', 
-         label='Dwarfs')
+         label='Dwarfs & Outliers')
 plt.hist(SGA_TF['Z_DESI_CMB'][sample1], 
          bins=z_bins, 
          color='darkblue', 
