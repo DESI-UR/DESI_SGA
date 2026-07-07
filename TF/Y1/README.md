@@ -6,12 +6,13 @@ This directory contains the code used to calibrate the DESI Y1 TFR with observat
     * Inputs:
         * `desi_pv_tf_iron_healpix.fits` (produced from a SQL query of the DESI database)
         * Additional file with `PHOTSYS` column (and `SGA_ID`)
-    * Output: `SGA-2020_iron_Vrot_dVsys_VI_photsys_v2.fits`
+    * Output: `SGA-2020_iron_Vrot_*.fits`
         * Center observations have been cleaned (`DELTACHI2` > 25, `ZWARN` = 0)
         * Rotational velocities at 0.4$R_{26}$ satisfy 10 < $V$ < 1000 km/s and $\Delta V/V_{min} \leq 5$
-        * Rotational velocities at 0.4$R_{26}$ have the same sign on the same side of the galaxy, and opposite signs on opposite sides
+        * Rotational velocities at 0.4$R_{26}$ have the same sign on the same side of the galaxy, and opposite signs on opposite sides (version 15+)
         * Any galaxy which has been removed due to VI is also not included (VI done with `TF_Y1_VI.ipynb`)
         * 7 km/s statistical uncertainty added to all reported Redrock uncertainties
+        * 0.06 systematic uncertainty in b/a added to all galaxies (version 18+)
 
 2. `TF_iron_internal-dustCorr.ipynb` - This notebook fits for the correlation between the observed apparent magnitude and the axis ratio of the galaxies in the Iron sample to correct for internal dust extinction.
     * Input: `SGA-2020_iron_Vrot_dVsys_VI_photsys_v2.fits` (produced from `iron_rot_vel.ipynb`)
