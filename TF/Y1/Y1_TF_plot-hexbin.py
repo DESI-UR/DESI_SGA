@@ -22,7 +22,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_v14.pickle', 'rb')
+# v13
+temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 'rb')
 cov_ab, tfr_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
 ################################################################################
@@ -35,7 +36,7 @@ temp_infile.close()
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
-SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v14.fits')
+SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
 
 # Plot those in the main cosmology sample differently
 main = SGA_TF['MAIN']
@@ -66,27 +67,51 @@ cosmo = LambdaCDM(H0=H0,
 # Center redshift values of each bin
 # NOTE: zc should really use zbins[:-1], but we are dropping the last bin 
 # (0.1-0.105) because we mistakenly used it while calibrating
-zc = 0.5*dz + zbins[:-2]
+zc = 0.5*dz + zbins[:-1]
 
 # Distance modulus for each redshift bin center
 mu_zc = cosmo.distmod(zc)
 
 # Extract slope
 slope = np.median(tfr_samples[0])
-slope_err = np.sqrt(cov_ab[0,0])
 
 # Each redshift bin has its own 0pt
 # To put it in absolute-magnitude space, we'll convert it to an absolute 
 # magnitude using the middle of the redshift bin
 # NOTE: Again, ZP should really be median(tfr_samples[1:-1], axis=1), but we are 
 # dropping the 0.1-0.105 redshift bin that we mistakenly used while calibrating
-ZP = np.median(tfr_samples[1:-2], axis=1) - mu_zc.value
-ZP_err = np.sqrt(np.diagonal(cov_ab[1:-2,1:-2])) # Should include z-bin width to this uncertainty
+ZP = np.median(tfr_samples[1:-1], axis=1) - mu_zc.value
+ZP_err = np.sqrt(np.diagonal(cov_ab[1:-1,1:-1])) # Should include z-bin width to this uncertainty
 
 sig = np.median(tfr_samples[-1])
 
-logv = np.linspace(-1*np.ones(len(zbins)-2), 3.5*np.ones(len(zbins)-2), 100)
+logv = np.linspace(-1*np.ones(len(zbins)-1), 3.5*np.ones(len(zbins)-1), 100)
 absmag = slope*(logv - logV0) + ZP
+################################################################################
+
+
+
+################################################################################
+# Identify calibration sample
+#-------------------------------------------------------------------------------
+# Inclination cut
+q0 = 0.2
+i_min = 45*u.degree
+cosi2 = (SGA_TF['BA']**2 - q0**2)/(1 - q0**2)
+cosi2_max = np.cos(i_min)**2
+is_good_incl = cosi2 < cosi2_max
+
+# Morphology cut - only ML
+is_good_morph_ML = np.zeros_like(is_good_incl, dtype=bool)
+for i in range(len(SGA_TF)):
+    if SGA_TF['MORPHTYPE_AI'][i] == 'Spiral':
+        is_good_morph_ML[i] = True
+
+# John's VI
+is_good_John = SGA_TF['JOHN_VI'].mask
+
+# Combine selections
+is_cal = main & is_good_incl & is_good_morph_ML & is_good_John
 ################################################################################
 
 
@@ -122,6 +147,18 @@ plt.hexbin(np.log10(SGA_TF['V_0p4R26'][main]),
 
 plt.colorbar(label='Number of galaxies')
 
+# Plot calibration sample as contours
+_N, _edges_x, _edges_y = np.histogram2d(np.log10(SGA_TF['V_0p4R26'][is_cal]), 
+                                        SGA_TF['R_ABSMAG_SB26'][is_cal], 
+                                        bins=(np.linspace(-0.1, 3.1, 70), 
+                                              np.linspace(-25, -12.25, 80)))
+_mesh_x, _mesh_y = np.meshgrid(_edges_x[:-1], _edges_y[:-1], indexing='ij')
+plt.contour(_mesh_x, _mesh_y, _N, 
+            levels=np.linspace(3, 150, 7), 
+            linewidths=1, 
+            cmap='Grays', 
+            zorder=3)
+
 plt.plot(logv, absmag, 'k', zorder=3)
 plt.plot(logv, absmag + sig, 'k:', zorder=4)
 plt.plot(logv, absmag - sig, 'k:', zorder=5)
@@ -137,7 +174,18 @@ ax.tick_params(axis='both', which='major', labelsize=12);
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/iron_TFR_dz0p005_weightsVmax-1_cutsAlex_20250926-hexbin.png', 
+plt.savefig('../../../figures/Y1_papers/iron_TFR_dz0p005_weightsVmax-1_cutsAlex_20260706-hexbin_contours.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
+
+
+
+
+################################################################################
+# Save figure data for paper
+#-------------------------------------------------------------------------------
+
+################################################################################
+
+
