@@ -22,7 +22,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 
+# temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', # <-- v13 (used for cosmology)
+temp_infile = open('cov_ab_iron_v18_20260708.pickle',
                    'rb')
 cov_tfr, tfr_mcmc_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
@@ -34,9 +35,11 @@ temp_infile.close()
 # Read in galaxies
 #-------------------------------------------------------------------------------
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
-data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
+# data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
+data_directory = './'
 
-TF_Y1 = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
+# TF_Y1 = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
+TF_Y1 = Table.read(data_directory + 'SGA_iron_jointTFR_moduli-v18_20260708.fits')
 ################################################################################
 
 
@@ -109,7 +112,7 @@ for i in range(len(zbins) + 1):
         print(f'{i:2d}  {zbins[i-1]:0.3f} < z <= {zbins[i]:0.3f}  {np.sum(zbin_indices == i):3d} galaxies')
 '''
 
-'''
+
 ################################################################################
 # Save figure data for paper
 #-------------------------------------------------------------------------------
@@ -150,7 +153,7 @@ mcmcfit_hdul = fits.PrimaryHDU(header=hdr2, data=tfr_mcmc_samples)
 mcmcfit_hdul.writeto('paper_figures/Fig7/fig7_data.fits', overwrite=True)
 ################################################################################
 exit()
-'''
+
 
 
 ################################################################################
@@ -195,7 +198,7 @@ for i in range(m):
     axs[row,col].plot(_logv + logV0, a_*_logv + b_[i], color=c)
     
     axs[row,col].set(xlim=[1.7, 2.5], 
-                     ylim=[17.2, 12.5], 
+                     ylim=[17.5, 13], 
                      title=f'{zbins[i]:.3f} < z $\leq$ {zbins[i+1]:.3f}')
 
 # Delete extra axes
@@ -206,7 +209,7 @@ fig.supylabel(r'$m_r^{0.1} (26)$', fontsize=16);
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TF_Y1_zbin_calibration-array_v13-winter.png', 
+plt.savefig('../../../figures/Y1_papers/TF_Y1_zbin_calibration-array_v18-winter.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
