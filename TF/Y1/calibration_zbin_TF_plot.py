@@ -21,7 +21,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_v14.pickle', 'rb')
+# temp_infile = open('cov_ab_iron_jointTFR_v14.pickle', 'rb')
+temp_infile = open('cov_ab_iron_v18_20260708.pickle', 'rb')
 cov_tfr, tfr_mcmc_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
 ################################################################################
@@ -32,9 +33,10 @@ temp_infile.close()
 # Read in galaxies
 #-------------------------------------------------------------------------------
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
-data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
+# data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
-TF_Y1 = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v14.fits')
+# TF_Y1 = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v14.fits')
+TF_Y1 = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
 ################################################################################
 
 
@@ -154,9 +156,9 @@ plt.xlabel(r'$\log{(V(0.4R_{26})~[\mathrm{km/s}]}$)', fontsize=14);
 
 plt.legend(bbox_to_anchor=(1.05,1), loc='upper left', fontsize=9, ncol=1);
 
-# plt.show()
+plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TF_Y1_zbin_calibration_dz0p005_weightsVmax-1_cutsAlex_20250926.png', 
-            dpi=150, 
-            facecolor='none')
+# plt.savefig('../../../figures/Y1_papers/TF_Y1_zbin_calibration_v18.png', 
+#             dpi=150, 
+#             facecolor='none')
 ################################################################################

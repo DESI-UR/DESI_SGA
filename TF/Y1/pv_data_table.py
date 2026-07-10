@@ -24,10 +24,10 @@ import numpy as np
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
 # Galaxy data file name
-data_filename = 'DESI-DR1_TF_pv_cat_v14.fits'
+data_filename = 'DESI-DR1_TF_pv_cat_v13.fits'
 
 # Output data file name
-out_filename = 'DESI-DR1_TF_pv_cat_v14-pub.fits'
+out_filename = 'DESI-DR1_TF_pv_cat_v13-pub.fits'
 
 # Columns to include in data table
 col_names = ['SGA_ID', 
