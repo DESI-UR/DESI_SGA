@@ -8,7 +8,8 @@ points.
 #-------------------------------------------------------------------------------
 import numpy as np
 
-from astropy.cosmology import Planck18, LambdaCDM
+from astropy.io import fits
+from astropy.cosmology import FlatLambdaCDM
 from astropy.table import Table
 import astropy.units as u
 
@@ -22,8 +23,11 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-# v13
-temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 'rb')
+# v13 <-- used for cosmology
+# temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 'rb')
+
+# v18
+temp_infile = open('cov_ab_iron_v18_20260708.pickle', 'rb')
 cov_ab, tfr_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
 ################################################################################
@@ -34,9 +38,11 @@ temp_infile.close()
 # Read in galaxies
 #-------------------------------------------------------------------------------
 # data_directory = '/global/cfs/cdirs/desi/science/td/pv/tfgalaxies/Y1/'
-data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
+# data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
-SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
+# SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
+
+SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
 
 # Plot those in the main cosmology sample differently
 main = SGA_TF['MAIN']
@@ -50,13 +56,7 @@ main = SGA_TF['MAIN']
 h = 1
 H0 = 100*h
 
-cosmo = LambdaCDM(H0=H0, 
-                  Om0=Planck18.Om0, 
-                  Tcmb0=Planck18.Tcmb0, 
-                  Neff=Planck18.Neff, 
-                  m_nu=Planck18.m_nu, 
-                  Ob0=Planck18.Ob0, 
-                  Ode0=Planck18.Ode0)
+cosmo = FlatLambdaCDM(H0=H0, Om0=0.3151)
 ################################################################################
 
 
@@ -112,9 +112,37 @@ is_good_John = SGA_TF['JOHN_VI'].mask
 
 # Combine selections
 is_cal = main & is_good_incl & is_good_morph_ML & is_good_John
+
+SGA_TF['CAL'] = is_cal
 ################################################################################
 
 
+'''
+################################################################################
+# Save figure data for paper
+#-------------------------------------------------------------------------------
+# Build the header
+#-------------------------------------------------------------------------------
+hdr = fits.Header()
+
+hdr['DESI_DR'] = 'DR1'
+hdr['FIGURE'] = 8
+
+empty_primary = fits.PrimaryHDU(header=hdr)
+#-------------------------------------------------------------------------------
+table_hdu = fits.BinTableHDU(data=SGA_TF['V_0p4R26', 'V_0p4R26_ERR', 'R_ABSMAG_SB26', 'R_ABSMAG_SB26_ERR', 'MAIN', 'CAL'])
+
+table_hdu.columns['V_0p4R26'].name = 'VROT'
+table_hdu.columns['V_0p4R26_ERR'].name = 'VROT_ERR'
+table_hdu.columns['R_ABSMAG_SB26'].name = 'R_ABSMAG'
+table_hdu.columns['R_ABSMAG_SB26_ERR'].name = 'R_ABSMAG_ERR'
+
+hdul = fits.HDUList([empty_primary, table_hdu])
+
+hdul.writeto('paper_figures/Fig8/fig8_data.fits', overwrite=True)
+################################################################################
+exit()
+'''
 
 ################################################################################
 # Plot
@@ -159,9 +187,9 @@ plt.contour(_mesh_x, _mesh_y, _N,
             cmap='Grays', 
             zorder=3)
 
-plt.plot(logv, absmag, 'k', zorder=3)
-plt.plot(logv, absmag + sig, 'k:', zorder=4)
-plt.plot(logv, absmag - sig, 'k:', zorder=5)
+plt.plot(logv, absmag, 'k', lw=0.5, zorder=3)
+plt.plot(logv, absmag + sig, 'k:', lw=0.5, zorder=4)
+plt.plot(logv, absmag - sig, 'k:', lw=0.5, zorder=5)
 
 plt.xlim([0.5, 3.1])
 plt.ylim([-12.25, -24.5])
@@ -174,7 +202,7 @@ ax.tick_params(axis='both', which='major', labelsize=12);
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/iron_TFR_dz0p005_weightsVmax-1_cutsAlex_20260706-hexbin_contours.png', 
+plt.savefig('../../../figures/Y1_papers/iron_TFR_v18-hexbin_contours.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
@@ -182,10 +210,6 @@ plt.savefig('../../../figures/Y1_papers/iron_TFR_dz0p005_weightsVmax-1_cutsAlex_
 
 
 
-################################################################################
-# Save figure data for paper
-#-------------------------------------------------------------------------------
 
-################################################################################
 
 
