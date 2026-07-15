@@ -21,13 +21,15 @@ import numpy as np
 # User input
 #-------------------------------------------------------------------------------
 # Galaxy data directory
-data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
+# data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
+data_directory = ''
 
 # Galaxy data file name
-data_filename = 'DESI-DR1_TF_pv_cat_v14.fits'
+# data_filename = 'DESI-DR1_TF_pv_cat_v13.fits' # <-- cosmology catalog
+data_filename = 'SGA_iron_jointTFR_moduli-v18_20260708.fits'
 
 # Output LaTeX file name
-latex_filename = 'iron_TF_pv_short.tex'
+latex_filename = 'iron_TF_pv_short-v18.tex'
 
 # Columns to include in LaTeX table
 col_names = ['SGA_ID', 
@@ -52,7 +54,7 @@ err_dict = {'Z_DESI':'ZERR_DESI',
 colhead = '\\tablehead{\\colhead{SGA-2020} & \\colhead{R.A.} & \\colhead{Decl.} & \\colhead{Redshift} & \\colhead{$D(26)$} & \\colhead{$m_r(26)$} & \\colhead{$V(0.4R_{26})$} & \\colhead{$\mu$} & \\colhead{$\eta$} & \\colhead{Main} \\\[-0.5em] \\colhead{ID} & \\colhead{[deg]} & \\colhead{[deg]} & & \colhead{[arcmin]} & \colhead{[AB mag]} & \\colhead{[km/s]} & \\colhead{[AB mag]} & & \\colhead{sample}}'
 
 # Table foot (caption, footnotes)
-tabfoot = '\\tablecomments{{Ten} of the \\Ntot galaxies in the DESI DR1 TF catalog.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ $r$-band isophote are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI DR1 spectra, and rotational velocities at $0.4R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are calculated from the calibrated TFR, and the log distance ratios are based on the difference between the observed and predicted distance moduli.  Table~\\ref{tab:pv} is published in its entirety online in a machine-readable format.  A portion is shown here for guidance regarding its form and content.}'
+tabfoot = '\\tablecomments{{Five} of the \\Ntot galaxies in the DESI DR1 TF catalog.  Sky positions and diameters of the 26 mag arcsec$^{-2}$ $r$-band isophote are from the SGA-2020 \\citep{SGA}.  Redshifts are measured from the DESI DR1 spectra, and rotational velocities at $0.4R_{26}$ are computed as described in Sec.~\\ref{sec:measure_rot_vel}.  Distance moduli are calculated from the calibrated TFR, and the log distance ratios are based on the difference between the observed and predicted distance moduli.  Table~\\ref{tab:pv} is published in its entirety online in a machine-readable format.  A portion is shown here for guidance regarding its form and content.}'
 
 # Table name
 tab_name = 'DESI DR1 TF catalog'
@@ -78,10 +80,10 @@ data_table = Table.read(data_directory + data_filename)
 out_table = Table()
 
 for name in col_names:
-    out_table[name] = data_table[name][:10]
+    out_table[name] = data_table[name][:5]
     
     if name in err_dict.keys():
-        out_table[err_dict[name]] = data_table[err_dict[name]][:10]
+        out_table[err_dict[name]] = data_table[err_dict[name]][:5]
 ################################################################################
 
 
@@ -91,17 +93,21 @@ for name in col_names:
 #-------------------------------------------------------------------------------
 # Format functions and dictionary
 #-------------------------------------------------------------------------------
+def latex_0err(error):
+    err = '{:.0f}'.format(error)
+    return '\\pm{0}'.format(err)
+
 def latex_1err(error):
     err = '{:.1f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
     
 def latex_2err(error):
     err = '{:.2f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_3err(error):
     err = '{:.3f}'.format(error)
-    return '$\\pm${0}'.format(err)
+    return '\\pm{0}'.format(err)
 
 def latex_zerr(error):
     # err = '{:.2f}'.format(1e6*error)
@@ -118,8 +124,8 @@ format_dict = {'SGA_ID':'%7d',
                'D26':'{:.2f}', 
                'R_MAG_SB26':'{:.2f}', 
                'R_MAG_SB26_ERR':latex_2err,
-               'V_0p4R26':'{:.1f}',
-               'V_0p4R26_ERR':latex_1err, 
+               'V_0p4R26':'{:.0f}',
+               'V_0p4R26_ERR':latex_0err, 
                'MU_TF':'{:.2f}', 
                'MU_TF_ERR':latex_2err, 
                'LOGDIST':'{:.2f}', 
