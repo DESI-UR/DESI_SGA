@@ -12,11 +12,11 @@ import numpy as np
 
 import numdifftools as ndt
 
-from curve_fit_fxns import v_rot, chi2, chi2_reduced, curve_fit
+from curve_fit_fxns import *
 #==================================================================
 
 # initialize tables and empty columns ============================================
-loa_rotvel = Table.read('/pscratch/sd/d/dbustos/rot_curves/loa_rotvel_rkpc.fits')
+loa_rotvel = Table.read('/pscratch/sd/d/dbustos/rot_curves/shredded_rkpc.fits')
 
 SGA = Table.read('/global/cfs/cdirs/cosmo/data/sga/2020/SGA-2020.fits', 'ELLIPSE')
 
@@ -27,7 +27,8 @@ for i in range(len(SGA)):
 loa_rotvel['chi2_reduced'] = np.nan
 loa_rotvel['vmax_fit'] = np.nan
 loa_rotvel['rturn_fit'] = np.nan
-loa_rotvel['alpha_fit'] = np.nan
+loa_rotvel['vmax_err'] = np.nan
+loa_rotvel['rturn_err'] = np.nan
 #===================================================================================
 
 # find curve fit & uncertainty & plot ----------------------------------------------
@@ -36,14 +37,15 @@ for sga_id in np.unique(loa_rotvel['SGA_ID']):
     targ_id = loa_rotvel[loa_rotvel['SGA_ID'] == sga_id]
 
     # grab all fibers with velocity < 1000 km/s and passed VI
-    valid_fibers = targ_id[(abs(targ_id['Velocity'])<1000) & (targ_id['bad_map']==0)]
+    # valid_fibers = targ_id[(abs(targ_id['Velocity'])<1000) & (targ_id['bad_map']==0)]
+    valid_fibers = targ_id[(abs(targ_id['Velocity'])<1000)]
     
     # grab radius
     r_kpc = valid_fibers['r_kpc']
     
     # make sure there are still 3 points to curve fit
-    if (len(valid_fibers) < 3) or (len(np.unique(r_kpc.round(5))) < 3):
-        continue
+    # if (len(valid_fibers) < 3) or (len(np.unique(r_kpc.round(5))) < 3):
+    #     continue
 
     # absolute velocities
     velocity = abs(valid_fibers['Velocity'])
@@ -204,11 +206,15 @@ for sga_id in np.unique(loa_rotvel['SGA_ID']):
     
     np.save('/pscratch/sd/d/dbustos/hessian/' + str(sga_id) + '_hessian.npy', hess)
     
-    table_idx = (loa_rotvel['SGA_ID'] == sga_id) & ((abs(loa_rotvel['Velocity']) < 1000)) & (loa_rotvel['bad_map']==0)
+    table_idx = (loa_rotvel['SGA_ID'] == sga_id) & (abs(loa_rotvel['Velocity']) < 1000)
     loa_rotvel['chi2_reduced'][table_idx] = reduced_chi2
 
     loa_rotvel['vmax_fit'][table_idx] = min_fits[0]
     loa_rotvel['rturn_fit'][table_idx] = min_fits[1]
+
+    loa_rotvel['vmax_err'] = fit_params_err[0]
+    loa_rotvel['rturn_err'] = fit_params_err[1]
+    
 
     # sanity check ---------------------------------
     # print('sga_id:',str(sga_id))
