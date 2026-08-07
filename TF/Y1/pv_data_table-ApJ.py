@@ -26,10 +26,10 @@ data_directory = ''
 
 # Galaxy data file name
 # data_filename = 'DESI-DR1_TF_pv_cat_v13.fits'
-data_filename = 'SGA_iron_jointTFR_moduli-v18_20260708.fits'
+data_filename = 'SGA_iron_jointTFR_moduli-v19_20260717.fits'
 
 # Output data file name
-out_filename = 'DESI-DR1_TF_pv_cat_v18-ApJ.fits'
+out_filename = 'DESI-DR1_TF_pv_cat_v19-ApJ.fits'
 
 # Columns to include in data table
 # Also include the number of significant digits to be used for the column
@@ -42,7 +42,8 @@ col_names = {'SGA_ID':0,
              'V_0p4R26':0, 
              'MU_TF':2, 
              'LOGDIST':2,
-             'MAIN':0}
+             'MAIN':0, 
+             'MORPHTYPE_AI':0}
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
             'V_0p4R26':'V_0p4R26_ERR', 

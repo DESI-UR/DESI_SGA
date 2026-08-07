@@ -30,9 +30,8 @@ from help_functions import profile_histogram
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
 SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits') #<-- v13 - cosmology catalog
-# SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
 
-SGA_TF_latest = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
+SGA_TF_latest = Table.read('SGA_iron_jointTFR_moduli-v19_20260717.fits')
 
 # Plot those in the main cosmology sample differently
 sample1 = SGA_TF['MAIN']
@@ -93,12 +92,11 @@ N_alt, y_avg_alt, y_std_alt = profile_histogram(SGA_TF_latest['Z_DESI_CMB'][samp
                                                 _zbins, 
                                                 weights=SGA_TF_latest['LOGDIST_ERR'][sample1_latest]**-2, 
                                                 weighted=True)
-
 ################################################################################
 
 
 
-"""
+
 ################################################################################
 # Save data for figure
 #-------------------------------------------------------------------------------
@@ -130,9 +128,10 @@ hdul.writeto('paper_figures/Fig9/fig9_data.fits', overwrite=True)
 hdul = fits.HDUList([empty_primary, data_table_hdu])
 
 hdul.writeto('paper_figures/Fig14/fig14_data.fits', overwrite=True)
+
 ################################################################################
 exit()
-"""
+
 
 
 ################################################################################
@@ -143,6 +142,7 @@ fig = plt.figure(tight_layout=True)
 #-------------------------------------------------------------------------------
 # Plot the weighted mean
 #-------------------------------------------------------------------------------
+
 # Cosmology sample
 plt.errorbar(zc, y_avg, xerr=dz, yerr=y_std, fmt='o', 
              color='turquoise', 
@@ -154,7 +154,6 @@ plt.errorbar(zc, y_avg_alt, xerr=dz, yerr=y_std_alt, fmt='x',
              label='Updated')
 
 plt.legend()
-
 #-------------------------------------------------------------------------------
 # PV lines (code taken from Cullen)
 #-------------------------------------------------------------------------------
@@ -198,7 +197,7 @@ plt.xlim((0, 0.105))
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/iron_logdist-v-z_bins_v13-v18.png', 
+plt.savefig('../../../figures/Y1_papers/iron_logdist-v-z_bins_v13-v19.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################

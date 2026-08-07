@@ -39,7 +39,8 @@ col_names = ['SGA_ID',
              'V_0p4R26', 
              'MU_TF', 
              'LOGDIST',
-             'MAIN']
+             'MAIN', 
+             'MORPHTYPE_AI']
 err_dict = {'Z_DESI':'ZERR_DESI', 
             'R_MAG_SB26':'R_MAG_SB26_ERR', 
             'V_0p4R26':'V_0p4R26_ERR', 

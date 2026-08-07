@@ -42,7 +42,8 @@ temp_infile.close()
 
 # SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
 
-SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
+# SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
+SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v19_20260717.fits')
 
 # Plot those in the main cosmology sample differently
 main = SGA_TF['MAIN']
@@ -117,7 +118,7 @@ SGA_TF['CAL'] = is_cal
 ################################################################################
 
 
-'''
+
 ################################################################################
 # Save figure data for paper
 #-------------------------------------------------------------------------------
@@ -142,7 +143,7 @@ hdul = fits.HDUList([empty_primary, table_hdu])
 hdul.writeto('paper_figures/Fig8/fig8_data.fits', overwrite=True)
 ################################################################################
 exit()
-'''
+
 
 ################################################################################
 # Plot
@@ -150,8 +151,6 @@ exit()
 plt.figure(figsize=(5,7), tight_layout=True)
 
 plt.grid(ls=':')
-
-# plt.fill_between(logv, line_err[0], line_err[1], color='lightgray')
 
 plt.errorbar(np.log10(SGA_TF['V_0p4R26'][~main]), 
              SGA_TF['R_ABSMAG_SB26'][~main], 
@@ -202,7 +201,7 @@ ax.tick_params(axis='both', which='major', labelsize=12);
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/iron_TFR_v18-hexbin_contours.png', 
+plt.savefig('../../../figures/Y1_papers/iron_TFR_v19-hexbin_contours.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################

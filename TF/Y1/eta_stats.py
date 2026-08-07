@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 # v13 - cosmology catalog
 # SGA_TF = Table.read(data_directory + 'DESI-DR1_TF_pv_cat_v13.fits')
 
-SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v18_20260708.fits')
+SGA_TF = Table.read('SGA_iron_jointTFR_moduli-v19_20260717.fits')
 
 # Plot those in the main cosmology sample differently
 sample1 = SGA_TF['MAIN']
@@ -113,9 +113,9 @@ plt.tick_params(axis='x', which='major', labelsize=14)
 #-------------------------------------------------------------------------------
 
 
-plt.show()
+# plt.show()
 
-# plt.savefig('../../../figures/Y1_papers/iron_logdist_hists_v18.png', 
+# plt.savefig('../../../figures/Y1_papers/iron_logdist_hists_v19.png', 
 #             dpi=150, 
 #             facecolor='none');
 ################################################################################
