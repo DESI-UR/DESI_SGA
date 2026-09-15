@@ -24,16 +24,17 @@ import numpy as np
 data_directory = '/Users/kdouglass/Documents/Research/data/DESI/Y1/'
 
 # Galaxy data file name
-data_filename = 'DESI-DR1_TF_pv_cat_v13.fits'
+data_filename = 'DESI-DR1_TF_pv_cat_v19.fits'
 
 # Output data file name
-out_filename = 'DESI-DR1_TF_pv_cat_v13-pub.fits'
+out_filename = 'DESI-DR1_TF_pv_cat_v19-pub.fits'
 
 # Columns to include in data table
 col_names = ['SGA_ID', 
              'RA', 
              'DEC', 
              'Z_DESI', 
+             'Z_DESI_CMB',
              'D26', 
              'R_MAG_SB26', 
              'V_0p4R26', 
@@ -93,6 +94,11 @@ for name in col_names:
 
         if name in err_dict.keys():
             out_table[err_dict[name].upper()].unit = unit_dict[name]
+
+# Rename columns
+out_table['Z_DESI'].name = 'Z'
+out_table['ZERR_DESI'].name = 'ZERR'
+out_table['Z_DESI_CMB'].name = 'ZCMB'
 ################################################################################
 
 
