@@ -54,7 +54,7 @@ def profile_histogram(x, y, xbins,
 
         if weights is None:
             # weight based on yerr
-            w = 1/yerr**2
+            w = yerr**-2
         else:
             w = weights
         W, H, E = binned_statistic(x, [w, w*y, w*y**2], 

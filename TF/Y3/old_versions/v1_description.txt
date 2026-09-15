@@ -1,0 +1,1 @@
+DR2 v1 is using the same methodology as the  as the DR2 v0 catalog, except instead of applying fixed velocity cuts to determine the calibration sample, we select the bulk population of the TFR using the HDBScan cluster-finding algorithm. All other selection cuts/methodology are unchanged.

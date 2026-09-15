@@ -1,0 +1,5 @@
+DR2 v2 is using the same methodology as the DR2 v1 catalog with the following changes:
+- Switching from the 'jura' redux to the 'loa' redux
+- Performing an ellipse fit to the populations in each redshift bin
+- Calibrating over the range from 0.01 to 0.10
+

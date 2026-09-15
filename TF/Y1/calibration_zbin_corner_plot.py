@@ -20,7 +20,8 @@ import matplotlib.pyplot as plt
 ################################################################################
 # Read in best-fit pickle file
 #-------------------------------------------------------------------------------
-temp_infile = open('cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 
+temp_infile = open(#'cov_ab_iron_jointTFR_varyV0-dwarfsAlex_z0p1_zbins0p005_weightsVmax-1_dVsys_KAD-20250813.pickle', 
+                   'cov_ab_iron_v18_20260708.pickle',
                    'rb')
 cov_tfr, tfr_mcmc_samples, logV0, zmin, zmax, dz, zbins = pickle.load(temp_infile)
 temp_infile.close()
@@ -28,13 +29,15 @@ temp_infile.close()
 # Number of redshift bins
 m = len(zbins) - 1
 # m = len(zbins) - 2
-# NOTE: m should really be just len(zbins)-1, but we calibrated v13,v14 catalogs 
+# NOTE: m should really be just len(zbins)-1, but we calibrated the v13 catalog 
 # with an extra redshift bin (0.01-0.015) that we want to not show in the paper.
 
 # Create a boolean index array to mask the redshift bin we don't want to show
 # mask = np.ones(tfr_mcmc_samples.shape[0], dtype=bool)
 # mask[-2] = False
 ################################################################################
+
+# NOTE: image data for figure file is saved in the calibration array plot script
 
 
 
@@ -77,16 +80,38 @@ corner(tfr_mcmc_samples.T,#[mask].T,
        plot_datapoints=False,
        fill_contours=True,
        show_titles=True,
-       title_fmt='.3f', 
-       title_kwargs={"fontsize": 18, 'loc':'left', 'pad':10}, 
+       # title_fmt='.3f', 
+       title_kwargs={"fontsize": 22, 'pad':10},#, 'loc':'left'}, 
+       fig=fig
        );
+
+#-------------------------------------------------------------------------------
+# Add a table of the best-fit parameters to the upper right corner
+#-------------------------------------------------------------------------------
+ax_table = fig.add_axes([0.55, 0.65, 0.35, 0.25])
+ax_table.axis('off')
+
+table_text = []
+for i in range(len(labels)):
+    table_text.append([f'${values[i]:.2f} \pm {sigmas[i]:.2f}$'])
+
+param_table = ax_table.table(cellText=table_text, 
+                             rowLabels=labels, 
+                             loc='center', 
+                             cellLoc='center', 
+                             fontsize=48)
+param_table.scale(0.35, 6)
+#-------------------------------------------------------------------------------
 
 for ax in fig.get_axes():
     ax.tick_params(axis='both', which='major', labelsize=16)
 
 # plt.show()
 
-plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v13alt.png', 
+plt.savefig('../../../figures/Y1_papers/TFcorner_Y1_v18.png', 
             dpi=150, 
             facecolor='none')
 ################################################################################
+
+
+
