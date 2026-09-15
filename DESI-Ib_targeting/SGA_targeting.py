@@ -120,7 +120,7 @@ class GalaxyMarker(object):
             ####################################################################
            
             # Build HTML address for image
-            img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer=ls-dr11-early-v2&size={}'.format(ra, dec, pix_scale, img_size)
+            img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer=ls-dr11&size={}'.format(ra, dec, pix_scale, img_size)
                
             self.files.append(img_url)
 
@@ -409,6 +409,6 @@ class GalaxyMarker(object):
 if __name__ == "__main__":
    
     # Change this file name
-    input_filename = "SGA2025_large_galaxies_0.fits"
+    input_filename = "SGA2025_large_galaxies_8.fits"
    
     GalaxyMarker(input_filename)

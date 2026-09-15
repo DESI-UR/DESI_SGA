@@ -1,5 +1,5 @@
 import os
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from matplotlib.widgets import TextBox, Button
@@ -9,11 +9,17 @@ import io
 from urllib.request import urlopen
 
 from astropy.table import Table
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+
+# Custom functions
+from SGA_targeting import radec_to_xy
 
 
 
 pix_scale = 0.25 # arcsec/pixel
 pix_scale_arcmin = pix_scale/60
+pix_scale_degree = pix_scale_arcmin/60
 
 fiber_diameter = 1.52 # arcsec
 fiber_diameter_pixels = fiber_diameter/pix_scale
@@ -25,30 +31,46 @@ patrol_radius_pixels = patrol_radius/pix_scale_arcmin
 
 class GalaxyChecker(object):
    
-    def __init__(self, file_index):
+    def __init__(self, SGA_filename):
        
-        self.out_filename = "../target_files/SGA2025_off-axis_targets_" + str(file_index) + "_cleaned.txt"
-
-        SGA_filename = 'SGA2025_large_galaxies_' + str(file_index) + '.fits'
+        self.out_filename = "target_files/SGA2025_off-axis_targets_cleaned.txt"
 
         self.input_table = Table.read(SGA_filename, format='fits')
        
-        # Get all the objects in the specified file
-        self.objects = self.input_table['ref_id']
+        # Get all the objects in the source file
+        self.objects = self.input_table['SGAID']
 
+        # Read in current target list
+        # targets_filename = 'target_files/SGA2025_off-axis_targets_old.txt'
+        targets_filename = 'target_files/SGA2025_off-axis_targets_cleaned.txt'
+        infile = open(targets_filename, 'r')
+        self.curr_target_list = json.load(infile)
+        infile.close()
+
+        # print([type(k) for k in self.curr_target_list.keys()])
+        '''
+        # Read in earlier cleaned target file
+        # (This file was generated using all the large SGA-2025 galaxies, not 
+        # just those that are not part of the SGA-2020.  We're just going to use 
+        # entries in here if the galaxy doesn't already have targets selected.)
+        incomplete_targets_filename = 'target_files/SGA2025_off-axis_targets_cleaned-ALL_do-not-use.txt'
+        infile = open(incomplete_targets_filename, 'r')
+        incomplete_target_list = json.load(infile)
+        infile.close()
+        '''
         # Initialize list of image urls
         self.files = []
        
         for i in range(len(self.input_table)):
 
             # Extract sky coordinates for object
-            ra = self.input_table['ra'][i]
-            dec = self.input_table['dec'][i]
+            ra = self.input_table['RA'][i]
+            dec = self.input_table['DEC'][i]
 
             ####################################################################
             # Determine size of image needed
             #-------------------------------------------------------------------
-            major_axis = self.input_table['diam'][i]
+            major_axis = self.input_table['D26'][i]
 
             major_axis_pixels = major_axis/pix_scale_arcmin
 
@@ -56,23 +78,27 @@ class GalaxyChecker(object):
             ####################################################################
            
             # Build HTML address for image
-            img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer=ls-dr10&size={}'.format(ra, dec, pix_scale, img_size)
+            img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer=ls-dr11&size={}'.format(ra, dec, pix_scale, img_size)
             
             self.files.append(img_url)
-
+            '''
             # Extract galaxy name
             gal_name = self.objects[i]
 
-            # if gal_name == 'NGC3627':
-            #     print(img_url)
-               
-       
-        targets_filename = '../target_files/SGA2025_off-axis_targets_' + str(file_index) + '.txt'
+            # Check to see if galaxy is already in target list; if not, add it
+            if str(gal_name) not in self.curr_target_list.keys():
+                # print(gal_name, "not yet targeted")
 
-        infile = open(targets_filename, 'r')
-        self.curr_target_list = json.load(infile)
-        infile.close()
-       
+                # Check to see if I already "cleaned" the galaxy's targets
+                if str(gal_name) in incomplete_target_list.keys():
+                    # print("    I targeted", gal_name, "earlier:", len(incomplete_target_list[str(int(gal_name))]))
+
+                    self.curr_target_list[str(int(gal_name))] = incomplete_target_list[str(int(gal_name))]
+
+                else:
+
+                    self.curr_target_list[str(int(gal_name))] = []
+            '''
         self.curr_truth_display = []
        
         self.fig = plt.figure(figsize=(14,8.75))
@@ -134,8 +160,20 @@ class GalaxyChecker(object):
             print("No galaxies left!")
            
             self.seek_to_index(0)
+
+            return
        
-       
+        ########################################################################
+        # Only target galaxies at dec > -35 degrees
+        #-----------------------------------------------------------------------
+        curr_dec = self.input_table['DEC'][self.curr_index]
+
+        if curr_dec < -35:
+
+            self.seek_to_index(self.curr_index + 1)
+
+            return
+        ########################################################################
        
         '''
         for artist, x_pix, y_pix in self.curr_truth_display:
@@ -146,20 +184,20 @@ class GalaxyChecker(object):
        
         galaxy_img_page = urlopen(self.files[index])
         galaxy_img_byte = io.BytesIO(galaxy_img_page.read())
-        curr_frame = numpy.array(Image.open(galaxy_img_byte))
+        curr_frame = np.array(Image.open(galaxy_img_byte))
        
         self.display_axes.clear()
        
         self.display_axes.imshow(curr_frame, interpolation='nearest')
 
-        self.display_axes.set_title(str(index) + ' - ' + self.objects[index])
+        self.display_axes.set_title(str(index) + ' - ' + str(self.objects[index]) + ' ({:.3f}, {:.3f})'.format(self.input_table['RA'][self.curr_index], self.input_table['DEC'][self.curr_index]))
 
         ########################################################################
         # Plot the SGA ellipse footprint
         #-----------------------------------------------------------------------
-        major_axis = self.input_table['diam'][index]
-        axis_ratio = self.input_table['ba'][index]
-        phi = self.input_table['pa'][index]
+        major_axis = self.input_table['D26'][index]
+        axis_ratio = self.input_table['BA'][index]
+        phi = self.input_table['PA'][index]
 
         # Convert major axis units from arcminutes to pixels
         major_axis_pixels = major_axis/pix_scale_arcmin
@@ -178,6 +216,75 @@ class GalaxyChecker(object):
 
         self.display_axes.add_artist(SGA_ellipse)
         ########################################################################
+
+
+        ########################################################################
+        # Plot the higher-priority TF targets
+        #-----------------------------------------------------------------------
+        # Extract sky coordinates for object
+        ra = self.input_table['RA'][index]
+        dec = self.input_table['DEC'][index]
+        center_sky = SkyCoord(ra*u.deg, dec*u.deg)
+
+        #-----------------------------------------------------------------------
+        # Center fiber
+        #-----------------------------------------------------------------------
+        center_fiber = plt.Circle((center_row, center_col), 
+                                  fiber_diameter_pixels, 
+                                  color='#ff80ff', 
+                                  fill=False)
+        self.display_axes.add_artist(center_fiber)
+        #-----------------------------------------------------------------------
+
+
+        #-----------------------------------------------------------------------
+        # Minor axis fibers
+        #-----------------------------------------------------------------------
+        delta_b = 0.4*(0.5*major_axis*u.arcmin)*axis_ratio
+
+        fiber1 = center_sky.directional_offset_by((phi + 90)*u.deg, delta_b)
+        fiber2 = center_sky.directional_offset_by((phi - 90)*u.deg, delta_b)
+
+        for fiber in [fiber1, fiber2]:
+            fiber_xy = radec_to_xy(fiber.ra.value, fiber.dec.value, 
+                                   ra0=ra, dec0=dec, 
+                                   x0=center_row, y0=center_col, 
+                                   xscale=pix_scale_degree, 
+                                   yscale=pix_scale_degree)
+            fiber_circ = plt.Circle(fiber_xy, 
+                                    fiber_diameter_pixels, 
+                                    color='#ff80ff', 
+                                    fill=False)
+            self.display_axes.add_artist(fiber_circ)
+        #-----------------------------------------------------------------------
+
+
+        #-----------------------------------------------------------------------
+        # Major axis fibers
+        #-----------------------------------------------------------------------
+        x = np.arange(0.2,1.2,0.2)
+
+        # Distances along the semi-major axis from the center coordinate
+        delta_a = 0.5*(major_axis*u.arcmin)*x
+
+        # Target positions
+        fiber1 = center_sky.directional_offset_by(phi*u.deg, delta_a)
+        fiber2 = center_sky.directional_offset_by((phi + 180)*u.deg, delta_a)
+
+        for fiber in [fiber1, fiber2]:
+            for i in range(len(fiber)):
+                fiber_xy = radec_to_xy(fiber[i].ra.value, fiber[i].dec.value, 
+                                       ra0=ra, dec0=dec, 
+                                       x0=center_row, y0=center_col, 
+                                       xscale=pix_scale_degree, 
+                                       yscale=pix_scale_degree)
+                fiber_circ = plt.Circle(fiber_xy, 
+                                        fiber_diameter_pixels, 
+                                        color='#ff80ff', 
+                                        fill=False)
+                self.display_axes.add_artist(fiber_circ)
+        #-----------------------------------------------------------------------
+        ########################################################################
    
         self.add_existing_truth()
    
@@ -188,7 +295,8 @@ class GalaxyChecker(object):
 
     def add_existing_truth(self):
        
-        truth_data = self.curr_target_list[self.objects[self.curr_index]]
+        truth_data = self.curr_target_list[str(self.objects[self.curr_index])]
+        # print(self.curr_index, self.objects[self.curr_index], len(truth_data))
        
         for y_pixel, x_pixel in truth_data:
            
@@ -233,7 +341,7 @@ class GalaxyChecker(object):
                 self.display_axes.add_artist(new_circle)
                
                 #self.curr_truth_coords.append((y_pixel, x_pixel)) #row, col format
-                self.curr_target_list[self.objects[self.curr_index]].append((y_pixel, x_pixel))
+                self.curr_target_list[str(self.objects[self.curr_index])].append((y_pixel, x_pixel))
 
             # remove a truth value
             else:
@@ -246,7 +354,7 @@ class GalaxyChecker(object):
                        
                         del self.curr_truth_display[idx]
                        
-                        del self.curr_target_list[self.objects[self.curr_index]][idx]
+                        del self.curr_target_list[str(self.objects[self.curr_index])][idx]
                        
                         #print("Removing object")
                        
@@ -262,8 +370,8 @@ class GalaxyChecker(object):
 if __name__ == "__main__":
    
     # Change this file name
-    target_file_number = 0
+    target_file = 'SGA2025_large_galaxies_new.fits'
    
-    GalaxyChecker(target_file_number)
+    GalaxyChecker(target_file)
 
 
