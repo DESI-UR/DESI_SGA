@@ -133,7 +133,7 @@ for i in range(len(galaxy_filenames)):
     galaxy_index = {}
 
     for i in range(len(galaxy_table)):
-        galaxy_index[galaxy_table['ref_id'][i]] = i
+        galaxy_index[galaxy_table['SGA_ID'][i]] = i
     ############################################################################
 
 
@@ -152,15 +152,15 @@ for i in range(len(galaxy_filenames)):
         ########################################################################
         # Get center coordinates of galaxy (image)
         #-----------------------------------------------------------------------
-        ra_center = galaxy_table['ra'][i_gal]
-        dec_center = galaxy_table['dec'][i_gal]
+        ra_center = galaxy_table['RA'][i_gal]
+        dec_center = galaxy_table['DEC'][i_gal]
         ########################################################################
         
 
         ########################################################################
         # Determine size of image needed
         #-----------------------------------------------------------------------
-        major_axis = galaxy_table['diam'][i_gal]
+        major_axis = galaxy_table['D26'][i_gal]
 
         major_axis_pixels = major_axis/pix_scale_arcmin
 
