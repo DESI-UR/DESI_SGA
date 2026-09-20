@@ -34,6 +34,7 @@ class GalaxyChecker(object):
     def __init__(self, SGA_filename):
        
         self.out_filename = "target_files/SGA2025_off-axis_targets_cleaned.txt"
+        # self.out_filename = "target_files/test.txt"
 
         self.input_table = Table.read(SGA_filename, format='fits')
        
@@ -110,8 +111,13 @@ class GalaxyChecker(object):
        
         self.prev_axes = self.fig.add_axes([.08, .6, .1, .05])
        
-        self.save_axes = self.fig.add_axes([.08, .5, .1, .05])
-       
+        self.save_axes = self.fig.add_axes([.08, .8, .1, .05])
+
+        self.clear_axes = self.fig.add_axes([.08, .1, .07, .05])
+
+        self.zoom_axes = self.fig.add_axes([.08, .4, .1, .05])
+
+        self.reset_axes = self.fig.add_axes([.08, .3, .1, .05])
        
        
         self.next_button = Button(self.next_axes, 'Next')
@@ -127,11 +133,20 @@ class GalaxyChecker(object):
         self.save_button = Button(self.save_axes, 'Save')
        
         self.save_button.on_clicked(self.save_button_func)
+
+        self.clear_button = Button(self.clear_axes, 'ClearAll')
+        self.clear_button.on_clicked(self.clear_existing_truth)
+
+        self.zoom_button = Button(self.zoom_axes, 'TopLeft')
+        self.zoom_button.on_clicked(self.topleft_zoom)
+
+        self.reset_button = Button(self.reset_axes, 'ResetView')
+        self.reset_button.on_clicked(self.reset_view)
        
        
         self.fig.canvas.mpl_connect('pick_event', self.onpick)
        
-        self.seek_to_index(0)
+        self.seek_to_index(0) # Change this value to start at a specific galaxy
        
         plt.show()
        
@@ -150,6 +165,26 @@ class GalaxyChecker(object):
         json.dump(self.curr_target_list, outfile)
        
         outfile.close()
+
+    def topleft_zoom(self, event):
+
+        # print('Clicked TopLeft')
+
+        self.display_axes.set_xlim(0, 600)
+
+        self.display_axes.set_ylim(600, 0)
+
+        plt.draw()
+
+    def reset_view(self, event):
+
+        rows = self.curr_frame.shape[0]
+        cols = self.curr_frame.shape[1]
+
+        self.display_axes.set_xlim(0, cols)
+        self.display_axes.set_ylim(rows, 0)
+
+        plt.draw()
        
     def seek_to_index(self, index):
        
@@ -191,6 +226,8 @@ class GalaxyChecker(object):
         self.display_axes.imshow(curr_frame, interpolation='nearest')
 
         self.display_axes.set_title(str(index) + ' - ' + str(self.objects[index]) + ' ({:.3f}, {:.3f})'.format(self.input_table['RA'][self.curr_index], self.input_table['DEC'][self.curr_index]))
+
+        self.curr_frame = curr_frame
 
         ########################################################################
         # Plot the SGA ellipse footprint
@@ -304,6 +341,9 @@ class GalaxyChecker(object):
             new_circle = plt.Circle((x_pixel, y_pixel), 
                                     fiber_diameter_pixels, 
                                     color='#CC0000', 
+                                    # color='#bbbbbb',
+                                    # edgegapcolor='#CC0000',
+                                    # linestyle='dashed',
                                     fill=False)
            
             self.curr_truth_display.append((new_circle, x_pixel, y_pixel))
@@ -311,6 +351,19 @@ class GalaxyChecker(object):
             self.display_axes.add_artist(new_circle)
            
                
+    def clear_existing_truth(self, event):
+
+        # print('Clicked ClearAll')
+
+        for idx, (curr_circle, x_pix, y_pix) in enumerate(self.curr_truth_display):
+   
+            curr_circle.remove()
+
+        self.curr_truth_display = []
+
+        self.curr_target_list[str(self.objects[self.curr_index])] = []
+
+        plt.draw()
                
                
    
@@ -334,6 +387,7 @@ class GalaxyChecker(object):
                 new_circle = plt.Circle((x_pixel, y_pixel), 
                                         fiber_diameter_pixels, 
                                         color='#CC0000', 
+                                        # color='#bbbbbb',
                                         fill=False)
                
                 self.curr_truth_display.append((new_circle, x_pixel, y_pixel))

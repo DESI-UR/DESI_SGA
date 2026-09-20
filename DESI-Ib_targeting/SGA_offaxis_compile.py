@@ -29,14 +29,9 @@ pix_scale_degrees = pix_scale/3600 # deg/pixel
 ################################################################################
 # Files
 #-------------------------------------------------------------------------------
-galaxy_filenames = []
-target_filenames = []
-clean_target_filenames = []
+galaxy_filename = 'SGA2025_large_galaxies_new.fits'
 
-for i in range(13):
-    galaxy_filenames.append('SGA2025_large_galaxies_' + str(i) + '.fits')
-    clean_target_filenames.append('../target_files/SGA2025_off-axis_targets_' + str(i) + '_cleaned.txt')
-    target_filenames.append('../target_files/SGA2025_off-axis_targets_' + str(i) + '.txt')
+clean_target_filename = 'target_files/SGA2025_off-axis_targets_cleaned.txt'
 ################################################################################
 
 
@@ -110,118 +105,121 @@ GALAXY = []
 RA = []
 DEC = []
 
-for i in range(len(galaxy_filenames)):
 
-    ############################################################################
-    # Open files
-    #---------------------------------------------------------------------------
-    galaxy_table = Table.read(galaxy_filenames[i], format='fits')
+############################################################################
+# Open files
+#---------------------------------------------------------------------------
+galaxy_table = Table.read(galaxy_filename, format='fits')
 
-    if os.path.isfile(clean_target_filenames[i]):
-        infile = open(clean_target_filenames[i], 'r')
-    else:
-        infile = open(target_filenames[i], 'r')
-
-    targets = json.load(infile)
-    infile.close()
-    ############################################################################
+infile = open(clean_target_filename, 'r')
+targets = json.load(infile)
+infile.close()
+############################################################################
 
 
-    ############################################################################
-    # Build look-up dictionary for galaxy table
-    #---------------------------------------------------------------------------
-    galaxy_index = {}
+############################################################################
+# Build look-up dictionary for galaxy table
+#---------------------------------------------------------------------------
+galaxy_index = {}
 
-    for i in range(len(galaxy_table)):
-        galaxy_index[galaxy_table['ref_id'][i]] = i
-    ############################################################################
-
-
-    ############################################################################
-    # Put targets into lists
-    #---------------------------------------------------------------------------
-    for galaxy in targets:
-
-        ########################################################################
-        # Find galaxy in galaxy table
-        #-----------------------------------------------------------------------
-        i_gal = galaxy_index[galaxy]
-        ########################################################################
+for i in range(len(galaxy_table)):
+    galaxy_index[galaxy_table['SGAID'][i]] = i
+############################################################################
 
 
-        ########################################################################
-        # Get center coordinates of galaxy (image)
-        #-----------------------------------------------------------------------
-        ra_center = galaxy_table['ra'][i_gal]
-        dec_center = galaxy_table['dec'][i_gal]
-        ########################################################################
-        
+############################################################################
+# Put targets into lists
+#---------------------------------------------------------------------------
+for galaxy in targets.keys():
 
-        ########################################################################
-        # Determine size of image needed
-        #-----------------------------------------------------------------------
-        major_axis = galaxy_table['diam'][i_gal]
-
-        major_axis_pixels = major_axis/pix_scale_arcmin
-
-        img_size = int(major_axis_pixels + 100)
-        ########################################################################
+    ########################################################################
+    # Find galaxy in galaxy table
+    #-----------------------------------------------------------------------
+    try:
+        i_gal = galaxy_index[int(galaxy)]
+    except KeyError:
+        continue
+    ########################################################################
 
 
-        ########################################################################
-        # Download image file and create WCS object from header
-        #-----------------------------------------------------------------------
-        img_url = 'https://www.legacysurvey.org/viewer/cutout.fits?ra={}&dec={}&%22/pix={}&layer=ls-dr10&size={}'.format(ra_center, dec_center, pix_scale, img_size)
+    ########################################################################
+    # Get center coordinates of galaxy (image)
+    #-----------------------------------------------------------------------
+    ra_center = galaxy_table['RA'][i_gal]
+    dec_center = galaxy_table['DEC'][i_gal]
+    ########################################################################
+    
 
-        try:
-            hdu = fits.open(img_url, format='fits')
-        except:
-            if os.path.isfile('../large_gal_images/' + galaxy + '.fits'):
-                hdu = fits.open('../large_gal_images/' + galaxy + '.fits', 
-                                format='fits')
-            else:
-                # if galaxy == 'NGC0205':
-                #     print(galaxy, 'has no image!')
-                #     continue
-                    
-                print(galaxy, img_url)
-                raise
+    ########################################################################
+    # Determine size of image needed
+    #-----------------------------------------------------------------------
+    major_axis = galaxy_table['D26'][i_gal]
 
-        gal_header = hdu[0].header
-        w = WCS(gal_header)
-        ########################################################################
+    major_axis_pixels = major_axis/pix_scale_arcmin
+
+    img_size = int(major_axis_pixels + 100)
+
+    # The html apparently has a max pixel size of 3000
+    if img_size > 3000:
+        img_size = 3000
+    ########################################################################
 
 
-        ########################################################################
-        # Transform pixel coordinates to ra, dec
-        #-----------------------------------------------------------------------
-        galaxy_target_pixels = np.array(targets[galaxy])
+    ########################################################################
+    # Download image file and create WCS object from header
+    #-----------------------------------------------------------------------
+    img_url = 'https://www.legacysurvey.org/viewer/cutout.fits?ra={}&dec={}&%22/pix={}&layer=ls-dr11&size={}'.format(ra_center, dec_center, pix_scale, img_size)
 
-        if galaxy_target_pixels.shape[0] == 0:
-            print(galaxy, 'has no off-axis targets!')
-            continue
+    try:
+        hdul = fits.open(img_url, format='fits')
+    except:
+        if os.path.isfile('../../large_gal_images/' + galaxy + '.fits'):
+            hdul = fits.open('../../large_gal_images/' + galaxy + '.fits', 
+                             format='fits')
+        else:
+            # if galaxy == 'NGC0205':
+            #     print(galaxy, 'has no image!')
+            #     continue
+                
+            print(galaxy, img_url)
+            raise
 
-        galaxy_target_pixels = galaxy_target_pixels[:,::-1]
+    gal_header = hdul[0].header
+    w = WCS(gal_header)
+    hdul.close()
+    ########################################################################
 
-        galaxy_target_pixels[:,1] = np.abs(galaxy_target_pixels[:,1] - gal_header['IMAGEH'])
 
-        zeros = np.zeros((galaxy_target_pixels.shape[0], 1))
+    ########################################################################
+    # Transform pixel coordinates to ra, dec
+    #-----------------------------------------------------------------------
+    galaxy_target_pixels = np.array(targets[galaxy])
 
-        galaxy_target_pixels = np.concatenate((galaxy_target_pixels, zeros), axis=1)
+    if galaxy_target_pixels.shape[0] == 0:
+        print(galaxy, 'has no off-axis targets!')
+        continue
 
-        coords = w.wcs_pix2world(galaxy_target_pixels, 0)
+    galaxy_target_pixels = galaxy_target_pixels[:,::-1]
 
-        GALAXY.extend([galaxy]*coords.shape[0])
-        RA.append(coords[:,0])
-        DEC.append(coords[:,1])
-        ########################################################################
-    ############################################################################
+    galaxy_target_pixels[:,1] = np.abs(galaxy_target_pixels[:,1] - gal_header['IMAGEH'])
+
+    zeros = np.zeros((galaxy_target_pixels.shape[0], 1))
+
+    galaxy_target_pixels = np.concatenate((galaxy_target_pixels, zeros), axis=1)
+
+    coords = w.wcs_pix2world(galaxy_target_pixels, 0)
+
+    GALAXY.extend([galaxy]*coords.shape[0])
+    RA.append(coords[:,0])
+    DEC.append(coords[:,1])
+    ########################################################################
+############################################################################
 
 
 #-------------------------------------------------------------------------------
 # Add lists to table
 #-------------------------------------------------------------------------------
-target_table['GALAXY'] = GALAXY
+target_table['SGAID'] = GALAXY
 #target_table['ROW'] = ROW
 #target_table['COL'] = COL
 target_table['RA'] = np.concatenate(RA)
@@ -230,6 +228,7 @@ target_table['DEC'] = np.concatenate(DEC)
 
 
 fits_table = Table()
+fits_table['SGAID'] = GALAXY
 fits_table['RA'] = np.concatenate(RA)
 fits_table['DEC'] = np.concatenate(DEC)
 ################################################################################
@@ -240,11 +239,11 @@ fits_table['DEC'] = np.concatenate(DEC)
 ################################################################################
 # Save results
 #-------------------------------------------------------------------------------
-target_table.write('../target_files/SGA2025_off-axis_targets.txt', 
+target_table.write('target_files/SGA2025_off-axis_targets.txt', 
                    format='ascii.commented_header', 
                    overwrite=True)
 
-fits_table.write('../target_files/SGA2025_off-axis_targets.fits', 
+fits_table.write('target_files/SGA2025_off-axis_targets.fits', 
                    format='fits', 
                    overwrite=True)
 ################################################################################
