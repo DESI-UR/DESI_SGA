@@ -2,6 +2,7 @@
 
 This directory contains the code used to calibrate the DESI DR2 TFR with observations from the DESI Peculiar Velocity Survey, a secondary targeting program in DESI.
 
+# Primary Directory Outline 
 
 1. `loa_rot_vel.ipynb` - This notebook computes the rotational velocity for as many galaxies within the Loa (DR2) sample as possible.
     * Inputs:
@@ -19,12 +20,29 @@ This directory contains the code used to calibrate the DESI DR2 TFR with observa
     * Input: `SGA-2020_loa_Vrot_v*.fits` (produced from `loa_rot_vel.ipynb`)
     * Output: `loa_internalDust_nokcorr.pickle` (contains MCMC samples and median $m_r$ from linear fit to $m_r$ v. $b/a$)
 
-3. `TF_Y3_zbin_calibration_v5_irrcal.ipynb` - This notebook calibrates the Tully Fisher relation using redshift bins 
+3. `TF-Y3_calibration_v7a.ipynb` - This notebook calibrates the Tully Fisher relation using redshift bins 
     * Inputs:
         * `SGA-2020_loa_Vrot_v5.fits` (produced from `loa_rot_vel.ipynb`)
         * `loa_internalDust_nokcorr.pickle` (contains MCMC samples and median $m_r$ for internal dust correction)
         * `TFY3_Classification.csv` (contains morphology classifications from SSL binary classifiers)
     * Output:
-        * `cov_ab_loa_jointTFR_ellipse_v5a_spirals.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
-        * `cov_ab_loa_jointTFR_ellipse_v5a_irregulars.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
-        * `SGA_loa_jointTFR_v5a.fits` (Main catalog)
+        * `cov_ab_loa_jointTFR_ellipse_v*.pickle` (contains covariance matrix, MCMC samples, and log $V_0$ value from calibration)
+        * `TF_Y3_TFR_fit_params_v*.fits` (table with best fit parameters: slope, per-bin intercepts, and uncertainties)
+        * `DESI-DR2_TF_pv_cat_v*.fits` (Main catalog)
+     
+# Additional Notebooks
+
+## Mocks
+
+* `mocks/TFR_DR2_mock_gen.ipynb` - applies an equivalent calibration on Abacus mock data for use in downstream cosmology
+
+## Other 
+* `DR1_comparison` - Compares galaxy properties and fit between DESI DR1 and DR2 TF samples
+* `Loa_Vcomp.ipynb` - Looks at how the velocities compare when we have observations made on both sides of the galaxy's center
+* `mock_scale_tests.ipynb` - uses the calibration on mock data to determine the optimal size of the ellipse used for identifying the main galaxy population
+* `Morphology_VI.ipynb` - Visual inspection of galaxy morphologies
+* `TF_CF4_hyperfit.ipynb` - Apply our calibration method to CF4 data
+* `TF_Y3_scatter.ipynb` - Looks at how inclination angle uncertainties would impact the TFR scatter
+* `relative_PV_check.ipynb` - Looks at the relative contribution of peculiar velocities as a function of redshift
+* `rot_curve_corrections` - Corrects the rotational velocity measurements, accounting for cosmological SB dimming in fiber placement (incorporated into `loa_rot_vel.ipynb`)
+
