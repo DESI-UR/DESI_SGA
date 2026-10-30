@@ -15,7 +15,7 @@ def select_galaxy(table, sga_table, column_classification):
     sga_table:
         SGA fits
 
-    column_classification:
+    column_classification (str):
         All good galaxies are marked as a 1, this creates a new column to mark
 
     Returns
@@ -97,3 +97,47 @@ def select_galaxy(table, sga_table, column_classification):
                                 table[column_classification][obs_id] = 1
     
     return (table[table[column_classification]==1])
+
+def velocity_selection(loa_new, column_classification):
+    """ Remove all galaxies that have < 3 observations that are all less than 1000 km/s
+
+    Parameters
+    ----------
+    loa_new:
+        the database you want to sort through
+
+    column_classification (str):
+        All good galaxies are marked as a 1, this creates a new column to mark
+
+    Returns
+    -------
+    New table with only galaxies marked as 0
+    """
+    
+    # create a new table that removes all galaxies with < 3 observations that are all less than 1000 km/s
+    loa_new[column_classification] = 0 
+    for sga_id in tqdm(np.unique(loa_new['SGA_ID'])):
+        
+        #identify all targets in the galaxy
+        targ_list = loa_new[loa_new['SGA_ID']==sga_id]
+    
+        #get velocities for each point
+        velocity = np.array(targ_list['Velocity'])
+    
+        #------------------------------------------------------------------
+        # axe any galaxies that have < 3 points with valid velocities
+        #------------------------------------------------------------------
+        counter = 0
+    
+        for i in range(len(velocity)):
+            if abs(velocity[i]) < 1000:
+                counter += 1
+                
+        if counter < 3:
+            #print (sga_idx, ':not enough points')
+            continue
+    
+        elif counter >= 3:
+            loa_new[column_classification][loa_new['SGA_ID']==sga_id] = 1
+        
+    return (loa_new[loa_new[column_classification]==1])

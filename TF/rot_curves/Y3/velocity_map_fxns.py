@@ -31,7 +31,7 @@ def criteria(table, idx, zwarn, deltachi2):
     """
     return (table['ZWARN'][idx] == zwarn) & (table['DELTACHI2'][idx] > deltachi2)
 
-def criteria_sym(table, zwarn, deltachi2)
+def criteria_sym(table, zwarn, deltachi2):
     """Quality cut w/o index:
     Parameters
     -----------
