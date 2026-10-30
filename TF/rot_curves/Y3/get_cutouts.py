@@ -7,7 +7,7 @@ import os
 
 pix_scale = 0.25 # arcsec/pixel
 
-def get_cutout(sgaid, ra, dec, size, dr = 11, dir = '', verbose=False):
+def get_cutout(sgaid, ra, dec, size, dr = 11, dir = '', verbose=False, zoom = 14):
     """Grab and save legacy survey cutouts.
     
     Parameters
@@ -26,6 +26,8 @@ def get_cutout(sgaid, ra, dec, size, dr = 11, dir = '', verbose=False):
         Enter the directory you want the cutout to save in. Defaults to cache
     verbose : bool, optional
         Add some status messages if true
+    zoom: int, optional
+        Zoom of cutout, defaults to 14
         
     Returns
     -------
@@ -38,7 +40,7 @@ def get_cutout(sgaid, ra, dec, size, dr = 11, dir = '', verbose=False):
     img_name = (dir) + 'sga_{}.jpg'.format(sgaid)
 
     if dr == 11:
-        layer = 'ls-dr11-early-v2'
+        layer = 'ls-dr11'
     if dr == 10:
         layer = 'ls-dr10'
     if dr == 9:
@@ -48,7 +50,7 @@ def get_cutout(sgaid, ra, dec, size, dr = 11, dir = '', verbose=False):
         if verbose:
             print('{} exists.'.format(img_name))
     else:
-        img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer={}&size={}&zoom=14&sga'.format(ra, dec, pix_scale, layer, size)
+        img_url = 'https://www.legacysurvey.org/viewer/cutout.jpg?ra={}&dec={}&%22/pix={}&layer={}&size={}&zoom={}&sga'.format(ra, dec, pix_scale, layer, size, zoom)
         if verbose:
             print('Get {}'.format(img_url))
             
